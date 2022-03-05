@@ -2,40 +2,85 @@ import cv2
 import pyvirtualcam
 from pyvirtualcam import PixelFormat
 import time
+from PIL import Image, ImageTk
+from threading import Thread, Lock
 
-vc = cv2.VideoCapture(0)
+class Camera:
 
-if not vc.isOpened():
-    raise RuntimeError('Video kaynagi acilamadi.')
+    def __init__(self,src=0,width=1280,height=720):
+        self.vc=cv2.VideoCapture(src)
+        self.vc.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self.vc.set(cv2.CAP_PROP_FRAME_HEIGHT,height)
+        self.width = width
+        self.height = height
+        self.fps = 30
+        self.copyDetected=True
+        self.alertSliceSize=25
+        self.vc.set(cv2.CAP_PROP_FPS, self.fps)
+        (self.grabbed, self.frame) = self.vc.read()
+        self.original_frame=self.frame
+        self.started = False
+        self.read_lock = Lock()
+        print("Tanimlamalar yapildi.")
 
-pref_width = 1280
-pref_height = 720
-pref_fps = 30
-vc.set(cv2.CAP_PROP_FRAME_WIDTH, pref_width)
-vc.set(cv2.CAP_PROP_FRAME_HEIGHT, pref_height)
-vc.set(cv2.CAP_PROP_FPS, pref_fps)
+    def start(self):
+        if not self.vc.isOpened():
+            raise RuntimeError('Video kaynagi acilamadi.')
+        if self.started :
+            print("Zaten basladi!")
+            return None
+        self.started = True
+        self.thread = Thread(target=self.update, args=())
+        self.thread.daemon = True
+        self.thread.start()
 
-width = int(vc.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(vc.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fps = vc.get(cv2.CAP_PROP_FPS)
-copyDetected=True
-alertSliceSize=25
-with pyvirtualcam.Camera(width, height, fps, fmt=PixelFormat.BGR) as cam:
-    print('Sanal kamera cihazi: ' + cam.device)
+        return self
+
+    def update(self) :
+        with pyvirtualcam.Camera(self.width, self.height, self.fps, fmt=PixelFormat.BGR) as cam:
+            print('Sanal kamera cihazi: ' + cam.device)
+            while True:
+                ret, self.frame = self.vc.read()
+                self.read_lock.acquire()
+                self.original_frame = self.frame.copy()
+                self.read_lock.release()
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+                if self.copyDetected == True:
+                    self.frame[:self.alertSliceSize,::] =0
+                    self.frame[:,:self.alertSliceSize,:] = 0
+                    self.frame[-self.alertSliceSize:,:,:] = 0
+                    self.frame[:,-self.alertSliceSize:,:] = 0
+                    self.frame[:self.alertSliceSize,:,2] = round(time.time()*1000)%255
+                    self.frame[:,:self.alertSliceSize,2] = round(time.time()*1000)%255
+                    self.frame[-self.alertSliceSize:,:,2] = round(time.time()*1000)%255
+                    self.frame[:,-self.alertSliceSize:,2] = round(time.time()*1000)%255
+                cam.send(self.frame)
+
+                time.sleep(.01)
+
+    def show_frame(self):
+        cv2.imshow('frame', self.original_frame)
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            self.vc.release()
+            cv2.destroyAllWindows()
+            exit(1)
+
+    def image_frame(self):
+        image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(image)
+        image = ImageTk.PhotoImage(image)
+        return image
+
+if __name__ == '__main__':
+    print("Sanal kamera baslatiliyor. Lutfen bekleyiniz.")
+    video_stream_widget = Camera().start()
     while True:
-        ret, frame = vc.read()
-        cv2.imshow('frame', frame)
-        #cv2.imshow('frame',frame)
-        if copyDetected == True:
-            frame[:alertSliceSize,::] =0
-            frame[:,:alertSliceSize,:] = 0
-            frame[-alertSliceSize:,:,:] = 0
-            frame[:,-alertSliceSize:,:] = 0
-            frame[:alertSliceSize,:,2] = round(time.time()*1000)%255
-            frame[:,:alertSliceSize,2] = round(time.time()*1000)%255
-            frame[-alertSliceSize:,:,2] = round(time.time()*1000)%255
-            frame[:,-alertSliceSize:,2] = round(time.time()*1000)%255
+        try:
+            video_stream_widget.show_frame()
+        except AttributeError:
+            pass
 
-        cam.send(frame)
-cv2.destroyAllWindows()
+
         
