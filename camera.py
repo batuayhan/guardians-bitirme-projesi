@@ -1,3 +1,5 @@
+import datetime
+import sys
 import cv2
 import pyvirtualcam
 from pyvirtualcam import PixelFormat
@@ -13,14 +15,15 @@ class Camera:
         self.vc.set(cv2.CAP_PROP_FRAME_HEIGHT,height)
         self.width = width
         self.height = height
-        self.fps = 30
+        #self.fps = 30
         self.copyDetected=True
         self.alertSliceSize=25
-        self.vc.set(cv2.CAP_PROP_FPS, self.fps)
+        #self.vc.set(cv2.CAP_PROP_FPS, self.fps)
         (self.grabbed, self.frame) = self.vc.read()
         self.original_frame=self.frame
         self.started = False
         self.read_lock = Lock()
+        self.finished = False
         print("Tanimlamalar yapildi.")
 
     def start(self):
@@ -36,9 +39,12 @@ class Camera:
         return self
 
     def update(self) :
-        with pyvirtualcam.Camera(self.width, self.height, self.fps, fmt=PixelFormat.BGR) as cam:
+        with pyvirtualcam.Camera(self.width, self.height, 30, fmt=PixelFormat.BGR) as cam:
             print('Sanal kamera cihazi: ' + cam.device)
             while True:
+                if self.finished:
+                    self.vc.release()
+                    break
                 ret, self.frame = self.vc.read()
                 self.read_lock.acquire()
                 self.original_frame = self.frame.copy()
@@ -56,7 +62,7 @@ class Camera:
                     self.frame[:,-self.alertSliceSize:,2] = round(time.time()*1000)%255
                 cam.send(self.frame)
 
-                time.sleep(.01)
+                #time.sleep(.01)
 
     def show_frame(self):
         cv2.imshow('frame', self.original_frame)
@@ -66,15 +72,37 @@ class Camera:
             cv2.destroyAllWindows()
             exit(1)
 
+    def record_video(self):
+        global out
+        out = cv2.VideoWriter("ogrenciKayit.mp4",cv2.VideoWriter_fourcc(*'mp4v'),15,(320,240))
+        while True:
+            ret,recordFrame = self.vc.read()
+            if self.finished:
+                self.vc.release()
+                break
+            if(ret):
+                recordFrame = cv2.resize(recordFrame,(320,240))
+                cv2.putText(recordFrame,"Saat: "+str(datetime.datetime.now()),(15,15),2,0.5,(255,255,2)) 
+                out.write(recordFrame)
+                if cv2.waitKey(20) & 0xFF == 27:
+                    break
+    
     def image_frame(self,x,y):
         imageframe = cv2.cvtColor(self.original_frame, cv2.COLOR_BGR2RGB)
         imageframe = Image.fromarray(imageframe).resize((x,y))
         #imageframe = ImageTk.PhotoImage(imageframe)
         return imageframe
+    def stop_camera(self):
+        out.release()
+        self.finished=True
+        quit()
+global out
 def start_camera():
     print("Sanal kamera baslatiliyor. Lutfen bekleyiniz.")
     video_stream_widget = Camera().start()
+    #video_stream_widget.record_video()
     return video_stream_widget
+
 
 
         

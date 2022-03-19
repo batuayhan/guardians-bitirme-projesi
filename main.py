@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 import camera
 from PIL import Image, ImageTk
-from threading import Thread, Lock
+from threading import Thread
+from tkinter import messagebox
+import sys
 
 class View(tk.Frame):
 
@@ -39,26 +41,49 @@ class View(tk.Frame):
         saatEntry.place(x=300, y=50)
 
         t2 = Thread(target=self.show_cam, args=(200,150))
+        t2.daemon = True
         t2.start()
-
-        submitButton = ttk.Button(self.window, text="Submit")
+        t3 = Thread(target=studentCam.record_video, args=())
+        t3.daemon=True
+        t3.start()
+        submitButton = ttk.Button(self.window, text="Finish",command = on_closing)
         submitButton.place(x=400, y=370, height=30)
 
     def show_cam(self,x,y):
         while True:
+            if finished:
+                break
             imageframe = studentCam.image_frame(x,y)
+            if finished:
+                break
             imageframe = ImageTk.PhotoImage(image=imageframe)
+            if finished:
+                break
             kameraLabel = ttk.Label(self.window, image=imageframe)
+            if finished:
+                break
             kameraLabel.image = imageframe
+            if finished:
+                break
             kameraLabel.place(x=300,y=150)
 
 global studentCam
+global finished
 def start_camera():
         global studentCam
         studentCam = camera.start_camera()
 
+def on_closing():
+    if messagebox.askokcancel("Finish", "Make you sure whether sent your exam papers. Are you sure?"):
+        global studentCam
+        global finished
+        finished=True
+        studentCam.stop_camera() #stop recording
+
+        
 if __name__ == "__main__":
     start_camera()
+    finished = False
     root = tk.Tk()
     view = View(root)
     root.title("Guardians")
