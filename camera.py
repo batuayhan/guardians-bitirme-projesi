@@ -33,7 +33,6 @@ class Camera:
         self.thread = Thread(target=self.update, args=())
         self.thread.daemon = True
         self.thread.start()
-
         return self
 
     def update(self) :
@@ -67,20 +66,15 @@ class Camera:
             cv2.destroyAllWindows()
             exit(1)
 
-    def image_frame(self):
-        image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(image)
-        image = ImageTk.PhotoImage(image)
-        return image
-
-if __name__ == '__main__':
+    def image_frame(self,x,y):
+        imageframe = cv2.cvtColor(self.original_frame, cv2.COLOR_BGR2RGB)
+        imageframe = Image.fromarray(imageframe).resize((x,y))
+        #imageframe = ImageTk.PhotoImage(imageframe)
+        return imageframe
+def start_camera():
     print("Sanal kamera baslatiliyor. Lutfen bekleyiniz.")
     video_stream_widget = Camera().start()
-    while True:
-        try:
-            video_stream_widget.show_frame()
-        except AttributeError:
-            pass
+    return video_stream_widget
 
 
         

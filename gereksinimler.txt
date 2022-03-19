@@ -1,0 +1,6 @@
+OBS virtual cam yükle.
+
+Kütüphaneler;
+cv2
+pyvirtualcam
+PIL
