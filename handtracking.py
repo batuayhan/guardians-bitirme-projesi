@@ -17,8 +17,10 @@ while True:
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = hands.process(imgRGB)
     # print("[INFO] handmarks: {}".format(results.multi_hand_landmarks))
+    
 
     if results.multi_hand_landmarks:
+        print("el kaldırıldı")
         for hand_landmarks in results.multi_hand_landmarks:
             for index, lm in enumerate(hand_landmarks.landmark):
                 height, width, channel = img.shape
