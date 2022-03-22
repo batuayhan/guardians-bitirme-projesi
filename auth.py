@@ -4,11 +4,13 @@ import time
 from selenium import webdriver
 
 class Auth:
-    URL = 'http://localhost:8080'
+    URL = ''
 
     def login():
+        '''
         driver = webdriver.Chrome()
         driver.get(Auth.URL)
+        '''
 
     def checkJWT(token):
         '''check if jwt is still valid'''
