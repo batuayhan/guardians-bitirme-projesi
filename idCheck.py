@@ -5,7 +5,7 @@ def read(path):
     reader = easyocr.Reader(['en'])
     return reader.readtext(path)
 
-def idControl():
+def idCheck():
     camera = cv2.VideoCapture(0)
     no = ""
     while True:
