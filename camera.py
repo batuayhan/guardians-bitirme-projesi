@@ -74,7 +74,7 @@ class Camera:
 
     def record_video(self):
         global out
-        out = cv2.VideoWriter("ogrenciKayit.mp4",cv2.VideoWriter_fourcc(*'mp4v'),15,(320,240))
+        out = cv2.VideoWriter("ogrenciKayit.avi",cv2.VideoWriter_fourcc(*'DIVX'),15,(320,240))
         while True:
             ret,recordFrame = self.vc.read()
             if self.finished:
@@ -95,6 +95,7 @@ class Camera:
     def stop_camera(self):
         out.release()
         self.finished=True
+    def finish(self):
         quit()
 global out
 def start_camera():

@@ -5,6 +5,24 @@ from PIL import Image, ImageTk
 from threading import Thread
 from tkinter import messagebox
 import sys
+import firebase_admin
+from firebase_admin import credentials
+from google.cloud import storage
+import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
+cred = credentials.Certificate("./serviceAccountKey.json")
+firebase = firebase_admin.initialize_app(cred)
+client = storage.Client()
+bucket = client.get_bucket('exam-guard.appspot.com')
+courseName = "BIL421"
+examName = "exam1"
+studentId = "161101024"
+directoryNames = ["examPapersByExamGuard","examPapersByPhone","examVideo","idCheck"]
+blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'/ogrenciKayit'+studentId+'.avi')
+#blob.content_type = "video/webm"
+#of = open("deneme.jpg", 'rb')
+#blob.upload_from_file(of)
+
 
 class View(tk.Frame):
 
@@ -50,6 +68,12 @@ class View(tk.Frame):
         submitButton.place(x=400, y=370, height=30)
 
     def show_cam(self,x,y):
+        print('goruntu yerlestirildi.')
+        imageframe = studentCam.image_frame(x,y)
+        imageframe = ImageTk.PhotoImage(image=imageframe)
+        kameraLabel = ttk.Label(self.window, image=imageframe)
+        kameraLabel.image = imageframe
+        kameraLabel.place(x=300,y=150)
         while True:
             if finished:
                 break
@@ -59,12 +83,8 @@ class View(tk.Frame):
             imageframe = ImageTk.PhotoImage(image=imageframe)
             if finished:
                 break
-            kameraLabel = ttk.Label(self.window, image=imageframe)
-            if finished:
-                break
+            kameraLabel.configure(image=imageframe)
             kameraLabel.image = imageframe
-            if finished:
-                break
             kameraLabel.place(x=300,y=150)
 
 global studentCam
@@ -79,6 +99,11 @@ def on_closing():
         global finished
         finished=True
         studentCam.stop_camera() #stop recording
+        print("video sisteme yükleniyor")
+        blob.upload_from_filename("ogrenciKayit.avi")
+        print("video sisteme yüklendi")
+        studentCam.finish()
+        print("program kapatildi")
 
         
 if __name__ == "__main__":
