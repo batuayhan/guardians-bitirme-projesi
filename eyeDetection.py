@@ -30,6 +30,21 @@ RIGHT_EYEBROW=[ 70, 63, 105, 66, 107, 55, 65, 52, 53, 46 ]
 map_face_mesh = mp.solutions.face_mesh
 # camera object 
 camera = cv.VideoCapture(0)
+# We need to set resolutions.
+# so, convert them from float to integer.
+frame_width = int(camera.get(3))
+frame_height = int(camera.get(4))
+   
+size = (frame_width, frame_height)
+   
+# Below VideoWriter object will create
+# a frame of above defined The output 
+# is stored in 'filename.avi' file.
+result = cv.VideoWriter('filename.avi', 
+                         cv.VideoWriter_fourcc(*'MJPG'),
+                         10, size)
+
+
 # landmark detection function 
 def landmarksDetection(img, results, draw=False):
     img_height, img_width= img.shape[:2]
@@ -237,6 +252,8 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         # writing image for thumbnail drawing shape
         # cv.imwrite(f'img/frame_{frame_counter}.png', frame)
         cv.imshow('frame', frame)
+        frame.flags.writeable = True
+        result.write(frame)
         key = cv.waitKey(2)
         if key==ord('q') or key ==ord('Q'):
             break

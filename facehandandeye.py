@@ -80,6 +80,16 @@ RIGHT_EYEBROW=[ 70, 63, 105, 66, 107, 55, 65, 52, 53, 46 ]
 map_face_mesh = mp.solutions.face_mesh
 # camera object 
 camera = cv2.VideoCapture(0)
+
+frame_width = int(camera.get(3))
+frame_height = int(camera.get(4))
+size = (frame_width, frame_height)
+result = cv2.VideoWriter('filename.avi', 
+                         cv2.VideoWriter_fourcc(*'MJPG'),
+                         10, size)
+                         
+
+
 # landmark detection function 
 def landmarksDetection(img, results, draw=False):
     img_height, img_width= img.shape[:2]
@@ -233,10 +243,27 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
     # starting time here 
     start_time = time.time()
     # starting Video loop here.
+    i = 0
     while True:
-        
-        ret, frame = camera.read() # getting frame from camera 
+        print(i)
+        if i >= 100:
+            break
 
+        ret, frame = camera.read() # getting frame from camera 
+        if ret == True: 
+    
+            # Write the frame into the
+            # file 'filename.avi'
+            result.write(frame)
+    
+            # Press S on keyboard 
+            # to stop the processs
+            if cv2.waitKey(1) & 0xFF == ord('s'):
+                break
+    
+        # Break the loop
+        else:
+            break
 
         #ret, frame = camera.read()
         imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -247,7 +274,7 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         if results.multi_hand_landmarks:
             if(elKaldirildiMi == False):
                 elKaldirildiMi = True
-                print("[INFO] El Kaldırıldı")
+                #print("[INFO] El Kaldırıldı")
             for hand_landmarks in results.multi_hand_landmarks:
                 for index, lm in enumerate(hand_landmarks.landmark):
                     height, width, channel = frame.shape
@@ -257,7 +284,7 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         else:
             if(elKaldirildiMi == True):
                 elKaldirildiMi = False
-                print("[INFO] El İndirildi")
+                #print("[INFO] El İndirildi")
         cur_time = time.time()
         fps = 1/(cur_time-prev_time)
         prev_time = cur_time
@@ -267,10 +294,10 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         #(_, im) = webcam.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-        if faces != ():
-            print("[INFO] Face Detected")
-        else:
-            print("[INFO] Face Not Detected")
+        #if faces != ():
+            #print("[INFO] Face Detected")
+        #else:
+            #print("[INFO] Face Not Detected")
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             face = gray[y:y + h, x:x + w]
@@ -284,9 +311,7 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
                 cv2.putText(frame, 'not recognized', (x-10, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0))
         #cv2.imshow('OpenCV', frame)
         
-        key = cv2.waitKey(10)
-        if key == 27:
-                break
+       
 
 
         
@@ -336,6 +361,8 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
             
             
 
+        
+
 
         # calculating  frame per seconds FPS
         end_time = time.time()-start_time
@@ -349,7 +376,7 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         if key==ord('q') or key ==ord('Q'):
             break
 
-
+        i+=1
 
 
 
@@ -361,3 +388,4 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
 
     cv2.destroyAllWindows()
     camera.release()
+    result.release()
