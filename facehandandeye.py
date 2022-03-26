@@ -70,8 +70,8 @@ frame_width = int(camera.get(3))
 frame_height = int(camera.get(4))
 size = (frame_width, frame_height)
 result = cv2.VideoWriter('filename.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, size)
-                         
-
+riskyMomentsFacePath = 'RiskyMoments/Face'
+riskyMomentsEyesPath = 'RiskyMoments/Eyes'
 
 # landmark detection function 
 def landmarksDetection(img, results, draw=False):
@@ -220,12 +220,16 @@ def pixelCounter(first_piece, second_piece, third_piece):
         color = [utils.GRAY, utils.YELLOW]
     return pos_eye, color
 
+def saveFrame(filename, frame):
+    cv2.imwrite(filename, frame)
+
 
 with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confidence=0.5) as face_mesh:
     # starting time here 
     start_time = time.time()
     # starting Video loop here.
-    
+    riskyFaceCounter = 1
+    riskyEyesCounter = 1
     while True:
         ret, frame = camera.read() # getting frame from camera 
         if ret == True: 
@@ -242,6 +246,7 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
             if(elKaldirildiMi == False):
                 elKaldirildiMi = True
                 print("[INFO] El Kaldırıldı")
+                i += 1
             for hand_landmarks in results.multi_hand_landmarks:
                 for index, lm in enumerate(hand_landmarks.landmark):
                     height, width, channel = frame.shape
@@ -260,9 +265,13 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         
         if faces != ():
             print("[INFO] Face Detected")
+            
         else:
-            print("[INFO] Face Not Detected")
+            saveFrame("RiskyMoments/Face/Frame" + str(riskyFaceCounter) + ".jpg", frame)
+            riskyFaceCounter += 1
+            #print("[INFO] Face Not Detected")
        
+
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             face = gray[y:y + h, x:x + w]
@@ -299,11 +308,13 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
             utils.colorBackgroundText(frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
 
             if eye_position != 'CENTER':
-                print(eye_position)
+                #print(eye_position)
+                saveFrame("RiskyMoments/Eyes/Frame" + str(riskyEyesCounter) + ".jpg", frame)
+                riskyEyesCounter += 1
             
         # writing image for thumbnail drawing shape
         # cv2.imwrite(f'img/frame_{frame_counter}.png', frame)
-        #cv2.imshow('frame', frame)
+        cv2.imshow('frame', frame)
         key = cv2.waitKey(2)
         if key==ord('q') or key ==ord('Q'):
             break
