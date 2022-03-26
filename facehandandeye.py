@@ -2,8 +2,6 @@ import cv2
 import mediapipe as mp
 import time
 import utils, math
-
-
 import sys, numpy, os
 
 
@@ -16,19 +14,15 @@ cur_time = 0
 
 
 size = 4
-haar_file = 'haarcascade_frontalface_default.xml'
-datasets = 'datasets'
-
-
-# Part 1: Create fisherRecognizer
-print('Recognizing Face Please Be in sufficient Lights...')
+faceRecognitionHaarcascadeFile = 'haarcascade_frontalface_default.xml'
+faceRecognitionDataSets = 'datasets'
 
 # Create a list of images and a list of corresponding names
 (images, labels, names, id) = ([], [], {}, 0)
-for (subdirs, dirs, files) in os.walk(datasets):
+for (subdirs, dirs, files) in os.walk(faceRecognitionDataSets):
     for subdir in dirs:
         names[id] = subdir
-        subjectpath = os.path.join(datasets, subdir)
+        subjectpath = os.path.join(faceRecognitionDataSets, subdir)
         for filename in os.listdir(subjectpath):
             path = subjectpath + '/' + filename
             label = id
@@ -46,11 +40,11 @@ model = cv2.face.LBPHFaceRecognizer_create()
 model.train(images, labels)
 
 # Part 2: Use fisherRecognizer on camera stream
-face_cascade = cv2.CascadeClassifier(haar_file)
-webcam = cv2.VideoCapture(0)
+face_cascade = cv2.CascadeClassifier(faceRecognitionHaarcascadeFile)
+
+
 
 elKaldirildiMi = False
-
 
 
 
@@ -61,32 +55,21 @@ TOTAL_BLINKS =0
 # constants
 CLOSED_EYES_FRAME =3
 FONTS =cv2.FONT_HERSHEY_COMPLEX
-
-# face bounder indices 
-FACE_OVAL=[ 10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103,67, 109]
-
-# lips indices for Landmarks
-LIPS=[ 61, 146, 91, 181, 84, 17, 314, 405, 321, 375,291, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95,185, 40, 39, 37,0 ,267 ,269 ,270 ,409, 415, 310, 311, 312, 13, 82, 81, 42, 183, 78 ]
-LOWER_LIPS =[61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95]
-UPPER_LIPS=[ 185, 40, 39, 37,0 ,267 ,269 ,270 ,409, 415, 310, 311, 312, 13, 82, 81, 42, 183, 78] 
 # Left eyes indices 
 LEFT_EYE =[ 362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385,384, 398 ]
-LEFT_EYEBROW =[ 336, 296, 334, 293, 300, 276, 283, 282, 295, 285 ]
-
 # right eyes indices
 RIGHT_EYE=[ 33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161 , 246 ]  
-RIGHT_EYEBROW=[ 70, 63, 105, 66, 107, 55, 65, 52, 53, 46 ]
-
 map_face_mesh = mp.solutions.face_mesh
+
+
 # camera object 
 camera = cv2.VideoCapture(0)
 
+# video recording
 frame_width = int(camera.get(3))
 frame_height = int(camera.get(4))
 size = (frame_width, frame_height)
-result = cv2.VideoWriter('filename.avi', 
-                         cv2.VideoWriter_fourcc(*'MJPG'),
-                         10, size)
+result = cv2.VideoWriter('filename.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, size)
                          
 
 
@@ -239,42 +222,26 @@ def pixelCounter(first_piece, second_piece, third_piece):
 
 
 with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confidence=0.5) as face_mesh:
-
     # starting time here 
     start_time = time.time()
     # starting Video loop here.
-    i = 0
+    
     while True:
-        print(i)
-        if i >= 100:
-            break
-
         ret, frame = camera.read() # getting frame from camera 
         if ret == True: 
-    
             # Write the frame into the
-            # file 'filename.avi'
             result.write(frame)
-    
-            # Press S on keyboard 
-            # to stop the processs
-            if cv2.waitKey(1) & 0xFF == ord('s'):
-                break
-    
         # Break the loop
         else:
             break
 
-        #ret, frame = camera.read()
         imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(imgRGB)
-        # print("[INFO] handmarks: {}".format(results.multi_hand_landmarks))
-        
 
         if results.multi_hand_landmarks:
             if(elKaldirildiMi == False):
                 elKaldirildiMi = True
-                #print("[INFO] El Kaldırıldı")
+                print("[INFO] El Kaldırıldı")
             for hand_landmarks in results.multi_hand_landmarks:
                 for index, lm in enumerate(hand_landmarks.landmark):
                     height, width, channel = frame.shape
@@ -284,20 +251,18 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         else:
             if(elKaldirildiMi == True):
                 elKaldirildiMi = False
-                #print("[INFO] El İndirildi")
-        cur_time = time.time()
-        fps = 1/(cur_time-prev_time)
-        prev_time = cur_time
+                print("[INFO] El İndirildi")
 
-        cv2.putText(frame, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
-
-        #(_, im) = webcam.read()
+        
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-        #if faces != ():
-            #print("[INFO] Face Detected")
-        #else:
-            #print("[INFO] Face Not Detected")
+
+        
+        if faces != ():
+            print("[INFO] Face Detected")
+        else:
+            print("[INFO] Face Not Detected")
+       
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             face = gray[y:y + h, x:x + w]
@@ -309,82 +274,41 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
                 cv2.putText(frame, '% s - %.0f' % (names[prediction[0]], prediction[1]), (x-10, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0))
             else:
                 cv2.putText(frame, 'not recognized', (x-10, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0))
-        #cv2.imshow('OpenCV', frame)
         
-       
-
-
-        
-
-
+ 
         frame_counter +=1 # frame counter
-        
-        if not ret: 
-            break # no more frames break
         #  resizing frame
-        
         frame = cv2.resize(frame, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
         frame_height, frame_width= frame.shape[:2]
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         results  = face_mesh.process(rgb_frame)
         if results.multi_face_landmarks:
             mesh_coords = landmarksDetection(frame, results, False)
-            ratio = blinkRatio(frame, mesh_coords, RIGHT_EYE, LEFT_EYE)
-            # cv2.putText(frame, f'ratio {ratio}', (100, 100), FONTS, 1.0, utils.GREEN, 2)
-            utils.colorBackgroundText(frame,  f'Ratio : {round(ratio,2)}', FONTS, 0.7, (30,100),2, utils.PINK, utils.YELLOW)
-
-            if ratio >5.5:
-                CEF_COUNTER +=1
-                # cv2.putText(frame, 'Blink', (200, 50), FONTS, 1.3, utils.PINK, 2)
-                utils.colorBackgroundText(frame,  f'Blink', FONTS, 1.7, (int(frame_height/2), 100), 2, utils.YELLOW, pad_x=6, pad_y=6, )
-
-            else:
-                if CEF_COUNTER>CLOSED_EYES_FRAME:
-                    TOTAL_BLINKS +=1
-                    CEF_COUNTER =0
-            # cv2.putText(frame, f'Total Blinks: {TOTAL_BLINKS}', (100, 150), FONTS, 0.6, utils.GREEN, 2)
-            utils.colorBackgroundText(frame,  f'Total Blinks: {TOTAL_BLINKS}', FONTS, 0.7, (30,150),2)
+            
             
             cv2.polylines(frame,  [numpy.array([mesh_coords[p] for p in LEFT_EYE ], dtype=numpy.int32)], True, utils.GREEN, 1, cv2.LINE_AA)
             cv2.polylines(frame,  [numpy.array([mesh_coords[p] for p in RIGHT_EYE ], dtype=numpy.int32)], True, utils.GREEN, 1, cv2.LINE_AA)
 
-            # Blink Detector Counter Completed
             right_coords = [mesh_coords[p] for p in RIGHT_EYE]
             left_coords = [mesh_coords[p] for p in LEFT_EYE]
             crop_right, crop_left = eyesExtractor(frame, right_coords, left_coords)
-            # cv2.imshow('right', crop_right)
-            # cv2.imshow('left', crop_left)
+
             eye_position, color = positionEstimator(crop_right)
             utils.colorBackgroundText(frame, f'R: {eye_position}', FONTS, 1.0, (40, 220), 2, color[0], color[1], 8, 8)
             eye_position_left, color = positionEstimator(crop_left)
             utils.colorBackgroundText(frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
+
+            if eye_position != 'CENTER':
+                print(eye_position)
             
-            
-
-        
-
-
-        # calculating  frame per seconds FPS
-        end_time = time.time()-start_time
-        fps = frame_counter/end_time
-
-        frame =utils.textWithBackground(frame,f'FPS: {round(fps,1)}',FONTS, 1.0, (30, 50), bgOpacity=0.9, textThickness=2)
         # writing image for thumbnail drawing shape
         # cv2.imwrite(f'img/frame_{frame_counter}.png', frame)
-        cv2.imshow('frame', frame)
+        #cv2.imshow('frame', frame)
         key = cv2.waitKey(2)
         if key==ord('q') or key ==ord('Q'):
             break
 
-        i+=1
-
-
-
         
-
-
-
-
 
     cv2.destroyAllWindows()
     camera.release()
