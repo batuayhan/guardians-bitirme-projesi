@@ -246,7 +246,6 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
             if(elKaldirildiMi == False):
                 elKaldirildiMi = True
                 print("[INFO] El Kaldırıldı")
-                i += 1
             for hand_landmarks in results.multi_hand_landmarks:
                 for index, lm in enumerate(hand_landmarks.landmark):
                     height, width, channel = frame.shape
