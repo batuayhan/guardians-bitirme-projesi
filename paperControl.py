@@ -1,9 +1,23 @@
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import cv2
+import requests
+import imutils
 
-def paperControl(image, east, min_confidence, width, height):
-	image = cv2.imread(image)
+def paperControl(image_name, east, min_confidence, width, height):
+	camera = cv2.VideoCapture(0)
+	while True:
+		#url = "http://192.168.1.20:8080/shot.jpg"
+		#img_resp = requests.get(url)
+		#img_arr = np.array(bytearray(img_resp.content), dtype=np.uint8)
+		#image = cv2.imdecode(img_arr, -1)
+		#image = imutils.resize(image, width=1000, height=1800)
+		_,image = camera.read()
+		cv2.imshow('Paper Check', image)
+		if cv2.waitKey(1) & 0xFF == ord('s'):
+			cv2.imwrite(image_name, image)
+			break
+	image = cv2.imread(image_name)
 	orig = image.copy()
 	(H, W) = image.shape[:2]
 	(newW, newH) = (width, height)
@@ -55,3 +69,6 @@ def paperControl(image, east, min_confidence, width, height):
 	# show the output image
 	cv2.imshow("Text Detection", orig)
 	cv2.waitKey(0)
+	camera.release()
+	cv2.destroyAllWindows()
+paperControl("papertest.jpg", "frozen_east_text_detection.pb", 0.5, 320, 320)
