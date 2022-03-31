@@ -29,7 +29,7 @@ for (subdirs, dirs, files) in os.walk(faceRecognitionDataSets):
             images.append(cv2.imread(path, 0))
             labels.append(int(label))
         id += 1
-(width, height) = (130, 100)
+
 
 # Create a Numpy array from the two lists above
 (images, labels) = [numpy.array(lis) for lis in [images, labels]]
@@ -44,12 +44,12 @@ face_cascade = cv2.CascadeClassifier(faceRecognitionHaarcascadeFile)
 
 
 
-elKaldirildiMi = False
+
 
 
 
 # variables 
-frame_counter =0
+
 CEF_COUNTER =0
 TOTAL_BLINKS =0
 # constants
@@ -224,20 +224,18 @@ def saveFrame(filename, frame):
     cv2.imwrite(filename, frame)
 
 
-with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confidence=0.5) as face_mesh:
-    # starting time here 
-    start_time = time.time()
-    # starting Video loop here.
-    riskyFaceCounter = 1
-    riskyEyesCounter = 1
-    while True:
-        ret, frame = camera.read() # getting frame from camera 
-        if ret == True: 
-            # Write the frame into the
-            result.write(frame)
-        # Break the loop
-        else:
-            break
+def detectRisks(frame):
+    elKaldirildiMi = False
+    frame_counter =0
+    (width, height) = (130, 100)
+    with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confidence=0.5) as face_mesh:
+        # starting time here 
+        start_time = time.time()
+        # starting Video loop here.
+        riskyFaceCounter = 1
+        riskyEyesCounter = 1
+
+        
 
         imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(imgRGB)
@@ -264,12 +262,11 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
         
         if faces != ():
             print("[INFO] Face Detected")
-            
         else:
             saveFrame("RiskyMoments/Face/Frame" + str(riskyFaceCounter) + ".jpg", frame)
             riskyFaceCounter += 1
             #print("[INFO] Face Not Detected")
-       
+        
 
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -283,7 +280,7 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
             else:
                 cv2.putText(frame, 'not recognized', (x-10, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0))
         
- 
+
         frame_counter +=1 # frame counter
         #  resizing frame
         frame = cv2.resize(frame, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
@@ -311,15 +308,5 @@ with map_face_mesh.FaceMesh(min_detection_confidence =0.5, min_tracking_confiden
                 saveFrame("RiskyMoments/Eyes/Frame" + str(riskyEyesCounter) + ".jpg", frame)
                 riskyEyesCounter += 1
             
-        # writing image for thumbnail drawing shape
-        # cv2.imwrite(f'img/frame_{frame_counter}.png', frame)
-        cv2.imshow('frame', frame)
-        key = cv2.waitKey(2)
-        if key==ord('q') or key ==ord('Q'):
-            break
-
         
-
-    cv2.destroyAllWindows()
-    camera.release()
-    result.release()
+        # cv2.imwrite(f'img/frame_{frame_counter}.png', frame)

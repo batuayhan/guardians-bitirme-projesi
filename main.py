@@ -9,6 +9,8 @@ import firebase_admin
 from firebase_admin import credentials
 from google.cloud import storage
 import os
+import RiskDetector
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase = firebase_admin.initialize_app(cred)
@@ -64,8 +66,21 @@ class View(tk.Frame):
         t3 = Thread(target=studentCam.record_video, args=())
         t3.daemon=True
         t3.start()
+
+        t4 = Thread(target=self.detectRisk, args=(200,150))
+        t4.daemon = True
+        t4.start()
+
         submitButton = ttk.Button(self.window, text="Finish",command = on_closing)
         submitButton.place(x=400, y=370, height=30)
+
+    def detectRisk(self, x, y):
+        while True:
+            imageframe = studentCam.image_frame(x,y)
+            ret = studentCam.grabbed
+            frame = studentCam.frame
+            RiskDetector.detectRisks(frame)
+        
 
     def show_cam(self,x,y):
         print('goruntu yerlestirildi.')
