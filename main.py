@@ -1,5 +1,7 @@
+import time
 import tkinter as tk
 from tkinter import ttk
+from tracemalloc import start
 import camera
 from PIL import Image, ImageTk
 from threading import Thread
@@ -25,6 +27,9 @@ blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'
 #of = open("deneme.jpg", 'rb')
 #blob.upload_from_file(of)
 
+startTime = -1
+endTime = -1
+riskyMomentsTimeStamps = []
 
 class View(tk.Frame):
 
@@ -36,6 +41,7 @@ class View(tk.Frame):
         self.window = tk.Toplevel(self)
 
     def new_window(self):
+        startTime = int(time.time())
         self.window.title("Guardians")
         self.window.geometry("510x420")
         self.window.configure(bg="#e8e8e8")
@@ -79,7 +85,17 @@ class View(tk.Frame):
             imageframe = studentCam.image_frame(x,y)
             ret = studentCam.grabbed
             frame = studentCam.frame
-            RiskDetector.detectRisks(frame)
+            detectionData = RiskDetector.detectRisks(frame)
+            if detectionData[0] == 1:
+                studentCam.handDetected = True
+            else:
+                studentCam.handDetected = False
+            if detectionData[1] == 1:
+                studentCam.copyDetected = True,
+                riskyMomentsTimeStamps.append(int(time.time()))
+                
+            else:
+                studentCam.copyDetected = False
         
 
     def show_cam(self,x,y):
@@ -110,6 +126,9 @@ def start_camera():
 
 def on_closing():
     if messagebox.askokcancel("Finish", "Make you sure whether sent your exam papers. Are you sure?"):
+        endTime = int(time.time())
+        print("exam time: ",endTime-startTime)
+        print("risky moments: ", riskyMomentsTimeStamps)
         global studentCam
         global finished
         finished=True
@@ -119,6 +138,7 @@ def on_closing():
         print("video sisteme yüklendi")
         studentCam.finish()
         print("program kapatildi")
+        
 
         
 if __name__ == "__main__":

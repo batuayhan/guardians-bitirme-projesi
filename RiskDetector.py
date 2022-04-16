@@ -235,6 +235,9 @@ def detectRisks(frame):
         riskyFaceCounter = 1
         riskyEyesCounter = 1
 
+
+        detectionData = [0,0]
+
         
 
         imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -244,6 +247,7 @@ def detectRisks(frame):
             if(elKaldirildiMi == False):
                 elKaldirildiMi = True
                 print("[INFO] El Kaldırıldı")
+                detectionData[0] = 1
             for hand_landmarks in results.multi_hand_landmarks:
                 for index, lm in enumerate(hand_landmarks.landmark):
                     height, width, channel = frame.shape
@@ -254,6 +258,7 @@ def detectRisks(frame):
             if(elKaldirildiMi == True):
                 elKaldirildiMi = False
                 print("[INFO] El İndirildi")
+                detectionData[0] = 0
 
         
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -261,11 +266,13 @@ def detectRisks(frame):
 
         
         if faces != ():
-            print("[INFO] Face Detected")
+            #print("[INFO] Face Detected")
+            detectionData[1] = 0
         else:
             saveFrame("RiskyMoments/Face/Frame" + str(riskyFaceCounter) + ".jpg", frame)
             riskyFaceCounter += 1
-            #print("[INFO] Face Not Detected")
+            print("[INFO] Face Not Detected")
+            detectionData[1] = 1
         
 
         for (x, y, w, h) in faces:
@@ -304,9 +311,14 @@ def detectRisks(frame):
             utils.colorBackgroundText(frame, f'L: {eye_position_left}', FONTS, 1.0, (40, 320), 2, color[0], color[1], 8, 8)
 
             if eye_position != 'CENTER':
-                #print(eye_position)
+                print(eye_position)
                 saveFrame("RiskyMoments/Eyes/Frame" + str(riskyEyesCounter) + ".jpg", frame)
                 riskyEyesCounter += 1
+                detectionData[1] = 1
+            else:
+                detectionData[1] = 0
+    
+    return detectionData
             
         
         # cv2.imwrite(f'img/frame_{frame_counter}.png', frame)
