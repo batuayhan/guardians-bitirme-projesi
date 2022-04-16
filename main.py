@@ -14,7 +14,10 @@ from google.cloud import storage
 import os
 import RiskDetector
 import datetime
+import ntplib
+from time import ctime
 
+ntpClient = ntplib.NTPClient()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase = firebase_admin.initialize_app(cred)
@@ -37,7 +40,8 @@ saatLabel = None
 
 
 def getCurrentTime():
-        return int(time.time())
+    request = ntpClient.request('europe.pool.ntp.org', version=3)
+    return int(request.orig_time)
 
 def groupRiskyMoments(lst):
     if lst != []:
@@ -133,10 +137,13 @@ class View(tk.Frame):
     
     def updateTime(self):
         while True:
-            
-            saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds=examTime-getCurrentTime()+startTime)))
-            time.sleep(1)
-
+            timeLeft = examTime-getCurrentTime()+startTime
+            if timeLeft >= 0 :
+                saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds = timeLeft)))
+                time.sleep(1)
+            else:
+                break   
+        return        
 
     def detectRisk(self, x, y):
         while True:
@@ -212,6 +219,8 @@ if __name__ == "__main__":
     root.title("Guardians")
     root.geometry("200x100")
     root.configure(bg="#e8e8e8")
-    root.eval('tk::PlaceWindow %s center' % root.winfo_pathname(root.winfo_id()))
+    x_Left = int(root.winfo_screenwidth()/2 - 100)
+    y_Top = int(root.winfo_screenheight()/2 - 50)
+    root.geometry("+{}+{}".format(x_Left, y_Top))
     view.pack(side="top", fill="both", expand=True)
     root.mainloop()

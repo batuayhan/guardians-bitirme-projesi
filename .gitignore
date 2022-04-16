@@ -2,3 +2,4 @@ __pycache__/*
 .idea/*
 *.avi
 RiskyMoments/*
+__pycache__/camera.cpython-38.pyc
