@@ -58,15 +58,20 @@ class View(tk.Frame):
         self.configure(bg="#e8e8e8")
         b.place(x=40,y=25,height=40)
         self.window = tk.Toplevel(self)
+        self.window.withdraw()
         
         
 
     def new_window(self):
         root.withdraw()
+        self.window.deiconify()
         global startTime
         startTime = getCurrentTime()
         self.window.title("Guardians")
         self.window.geometry("510x420")
+        x_Left = int(self.window.winfo_screenwidth()/2 - 255)
+        y_Top = int(self.window.winfo_screenheight()/2 - 210)
+        self.window.geometry("+{}+{}".format(x_Left, y_Top))
         self.window.configure(bg="#e8e8e8")
 
         buttonKimlik = ttk.Button(self.window, text="Kimlik Doğrulama")
@@ -191,5 +196,6 @@ if __name__ == "__main__":
     root.title("Guardians")
     root.geometry("200x100")
     root.configure(bg="#e8e8e8")
+    root.eval('tk::PlaceWindow %s center' % root.winfo_pathname(root.winfo_id()))
     view.pack(side="top", fill="both", expand=True)
     root.mainloop()
