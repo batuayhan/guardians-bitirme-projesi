@@ -171,29 +171,31 @@ def eyesExtractor(img, right_eye_coords, left_eye_coords):
 
 # Eyes Postion Estimator 
 def positionEstimator(cropped_eye):
-    # getting height and width of eye 
-    h, w =cropped_eye.shape
-    
-    # remove the noise from images
-    gaussain_blur = cv2.GaussianBlur(cropped_eye, (9,9),0)
-    median_blur = cv2.medianBlur(gaussain_blur, 3)
+    try:
+        # getting height and width of eye 
+        h, w =cropped_eye.shape
+        
+        # remove the noise from images
+        gaussain_blur = cv2.GaussianBlur(cropped_eye, (9,9),0)
+        median_blur = cv2.medianBlur(gaussain_blur, 3)
 
-    # applying thrsholding to convert binary_image
-    ret, threshed_eye = cv2.threshold(median_blur, 130, 255, cv2.THRESH_BINARY)
+        # applying thrsholding to convert binary_image
+        ret, threshed_eye = cv2.threshold(median_blur, 130, 255, cv2.THRESH_BINARY)
 
-    # create fixd part for eye with 
-    piece = int(w/3) 
+        # create fixd part for eye with 
+        piece = int(w/3) 
 
-    # slicing the eyes into three parts 
-    right_piece = threshed_eye[0:h, 0:piece]
-    center_piece = threshed_eye[0:h, piece: piece+piece]
-    left_piece = threshed_eye[0:h, piece +piece:w]
-    
-    # calling pixel counter function
-    eye_position, color = pixelCounter(right_piece, center_piece, left_piece)
+        # slicing the eyes into three parts 
+        right_piece = threshed_eye[0:h, 0:piece]
+        center_piece = threshed_eye[0:h, piece: piece+piece]
+        left_piece = threshed_eye[0:h, piece +piece:w]
+        
+        # calling pixel counter function
+        eye_position, color = pixelCounter(right_piece, center_piece, left_piece)
 
-    return eye_position, color 
-
+        return eye_position, color 
+    except:
+        return 0, 0
 # creating pixel counter function 
 def pixelCounter(first_piece, second_piece, third_piece):
     # counting black pixel in each part 

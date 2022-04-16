@@ -1,6 +1,7 @@
+from faulthandler import disable
 import time
 import tkinter as tk
-from tkinter import ttk
+from tkinter import StringVar, ttk
 from tracemalloc import start
 import camera
 from PIL import Image, ImageTk
@@ -12,6 +13,7 @@ from firebase_admin import credentials
 from google.cloud import storage
 import os
 import RiskDetector
+import datetime
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
 cred = credentials.Certificate("./serviceAccountKey.json")
@@ -20,6 +22,7 @@ client = storage.Client()
 bucket = client.get_bucket('exam-guard.appspot.com')
 courseName = "BIL421"
 examName = "exam1"
+examTime = 2700
 studentId = "161101024"
 directoryNames = ["examPapersByExamGuard","examPapersByPhone","examVideo","idCheck"]
 blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'/ogrenciKayit'+studentId+'.avi')
@@ -30,6 +33,22 @@ blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'
 startTime = -1
 endTime = -1
 riskyMomentsTimeStamps = []
+saatLabel = None
+
+
+def getCurrentTime():
+        return int(time.time())
+
+def groupRiskyMoments(lst):
+    if lst != []:
+        res = [[lst[0]]]
+        for i in range(1, len(lst)):
+            if lst[i-1]+1 == lst[i]:
+                res[-1].append(lst[i])
+            else:
+                res.append([lst[i]])
+        return res
+
 
 class View(tk.Frame):
 
@@ -39,9 +58,13 @@ class View(tk.Frame):
         self.configure(bg="#e8e8e8")
         b.place(x=40,y=25,height=40)
         self.window = tk.Toplevel(self)
+        
+        
 
     def new_window(self):
-        startTime = int(time.time())
+        root.withdraw()
+        global startTime
+        startTime = getCurrentTime()
         self.window.title("Guardians")
         self.window.geometry("510x420")
         self.window.configure(bg="#e8e8e8")
@@ -58,13 +81,11 @@ class View(tk.Frame):
         c2 = ttk.Checkbutton(self.window)
         c2.place(x=175, y=110)
 
-        saatLabel = ttk.Label(self.window, text="Saat")
+        global saatLabel
+        saatLabel = ttk.Label(self.window, text="Kalan Süre")
         saatLabel.place(x=300, y=25)
 
-        saatEntry = ttk.Entry(self.window)
-        saatEntry.insert(0, "Kalan Dakika: 45")
-        saatEntry.config(state='disabled')
-        saatEntry.place(x=300, y=50)
+
 
         t2 = Thread(target=self.show_cam, args=(200,150))
         t2.daemon = True
@@ -77,11 +98,25 @@ class View(tk.Frame):
         t4.daemon = True
         t4.start()
 
+        t5 = Thread(target=self.updateTime, args=())
+        t5.daemon = True
+        t5.start()
+
+    
+
         submitButton = ttk.Button(self.window, text="Finish",command = on_closing)
         submitButton.place(x=400, y=370, height=30)
+    
+    def updateTime(self):
+        while True:
+            
+            saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds=examTime-getCurrentTime()+startTime)))
+            time.sleep(1)
+
 
     def detectRisk(self, x, y):
         while True:
+            riskyMomentFlag = False
             imageframe = studentCam.image_frame(x,y)
             ret = studentCam.grabbed
             frame = studentCam.frame
@@ -90,9 +125,12 @@ class View(tk.Frame):
                 studentCam.handDetected = True
             else:
                 studentCam.handDetected = False
+                riskyMomentFlag = False
             if detectionData[1] == 1:
                 studentCam.copyDetected = True,
-                riskyMomentsTimeStamps.append(int(time.time()))
+                if riskyMomentFlag == False and getCurrentTime() not in riskyMomentsTimeStamps :
+                    riskyMomentsTimeStamps.append(getCurrentTime())
+                    riskyMomentFlag = True
                 
             else:
                 studentCam.copyDetected = False
@@ -126,9 +164,10 @@ def start_camera():
 
 def on_closing():
     if messagebox.askokcancel("Finish", "Make you sure whether sent your exam papers. Are you sure?"):
-        endTime = int(time.time())
+        endTime = getCurrentTime()
         print("exam time: ",endTime-startTime)
-        print("risky moments: ", riskyMomentsTimeStamps)
+        print("risky moments: ",(riskyMomentsTimeStamps))
+        print("risky moments: ", groupRiskyMoments(riskyMomentsTimeStamps))
         global studentCam
         global finished
         finished=True
