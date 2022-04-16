@@ -109,10 +109,13 @@ class View(tk.Frame):
     
     def updateTime(self):
         while True:
-            
-            saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds=examTime-getCurrentTime()+startTime)))
+            timeLeft = examTime-getCurrentTime()+startTime
+            if timeLeft >= 0 :
+                saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds = timeLeft)))
             time.sleep(1)
-
+            else:
+                break   
+        return        
 
     def detectRisk(self, x, y):
         while True:
