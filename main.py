@@ -117,7 +117,7 @@ class View(tk.Frame):
             timeLeft = examTime-getCurrentTime()+startTime
             if timeLeft >= 0 :
                 saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds = timeLeft)))
-            time.sleep(1)
+                time.sleep(1)
             else:
                 break   
         return        
@@ -196,6 +196,8 @@ if __name__ == "__main__":
     root.title("Guardians")
     root.geometry("200x100")
     root.configure(bg="#e8e8e8")
-    root.eval('tk::PlaceWindow %s center' % root.winfo_pathname(root.winfo_id()))
+    x_Left = int(root.winfo_screenwidth()/2 - 100)
+    y_Top = int(root.winfo_screenheight()/2 - 50)
+    root.geometry("+{}+{}".format(x_Left, y_Top))
     view.pack(side="top", fill="both", expand=True)
     root.mainloop()
