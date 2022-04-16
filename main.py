@@ -14,7 +14,10 @@ from google.cloud import storage
 import os
 import RiskDetector
 import datetime
+import ntplib
+from time import ctime
 
+ntpClient = ntplib.NTPClient()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase = firebase_admin.initialize_app(cred)
@@ -37,7 +40,8 @@ saatLabel = None
 
 
 def getCurrentTime():
-        return int(time.time())
+    request = ntpClient.request('europe.pool.ntp.org', version=3)
+    return int(request.orig_time)
 
 def groupRiskyMoments(lst):
     if lst != []:
