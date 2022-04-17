@@ -18,6 +18,7 @@ class Camera:
         #self.fps = 30
         self.copyDetected=True
         self.handDetected=False
+        self.isTimeOver = False
         self.alertSliceSize=25
         #self.vc.set(cv2.CAP_PROP_FPS, self.fps)
         (self.grabbed, self.frame) = self.vc.read()
@@ -71,6 +72,16 @@ class Camera:
                     self.frame[:,:self.alertSliceSize,1] = round(time.time()*1000)%255
                     self.frame[-self.alertSliceSize:,:,1] = round(time.time()*1000)%255
                     self.frame[:,-self.alertSliceSize:,1] = round(time.time()*1000)%255
+                
+                if self.isTimeOver == True:
+                    self.frame[:self.alertSliceSize,::] =0
+                    self.frame[:,:self.alertSliceSize,:] = 0
+                    self.frame[-self.alertSliceSize:,:,:] = 0
+                    self.frame[:,-self.alertSliceSize:,:] = 0
+                    self.frame[:self.alertSliceSize,:,0] = round(time.time()*1000)%255
+                    self.frame[:,:self.alertSliceSize,0] = round(time.time()*1000)%255
+                    self.frame[-self.alertSliceSize:,:,0] = round(time.time()*1000)%255
+                    self.frame[:,-self.alertSliceSize:,0] = round(time.time()*1000)%255
                 cam.send(self.frame)
 
                 #time.sleep(.01)
@@ -85,7 +96,7 @@ class Camera:
 
     def record_video(self):
         global out
-        out = cv2.VideoWriter("ogrenciKayit.avi",cv2.VideoWriter_fourcc(*'DIVX'),15,(320,240))
+        out = cv2.VideoWriter("ogrenciKayit.mp4",cv2.VideoWriter_fourcc(*'VIDX'),15,(320,240))
         while True:
             ret,recordFrame = self.vc.read()
             if self.finished:
