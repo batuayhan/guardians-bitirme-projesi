@@ -19,7 +19,11 @@ Exam videos of all students and detection of risky moments are recorded on ExamG
 
 #### Contributors
 Batuhan Ayhan
+
 Doğukan Doğru
+
 Furkan Dolaşık
+
 Furkan Örten
+
 Osman İdik
