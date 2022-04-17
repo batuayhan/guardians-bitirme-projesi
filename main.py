@@ -36,7 +36,7 @@ enter exam time as seconds !!
 examTime = 10
 studentId = "161101024"
 directoryNames = ["examPapersByExamGuard","examPapersByPhone","examVideo","idCheck"]
-blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'/ogrenciKayit'+studentId+'.avi')
+blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'/ogrenciKayit'+studentId+'.mp4')
 #blob.content_type = "video/webm"
 #of = open("deneme.jpg", 'rb')
 #blob.upload_from_file(of)
@@ -218,7 +218,7 @@ def on_closing():
         finished=True
         studentCam.stop_camera() #stop recording
         print("video sisteme yükleniyor")
-        blob.upload_from_filename("ogrenciKayit.avi")
+        blob.upload_from_filename("ogrenciKayit.mp4")
         print("video sisteme yüklendi")
         studentCam.finish()
         print("program kapatildi")
