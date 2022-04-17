@@ -1,7 +1,7 @@
 from faulthandler import disable
 import time
 import tkinter as tk
-from tkinter import StringVar, ttk
+from tkinter import PhotoImage, StringVar, ttk
 from tracemalloc import start
 import camera
 from PIL import Image, ImageTk
@@ -17,6 +17,10 @@ import datetime
 import ntplib
 from time import ctime
 import examguardTelegramBot
+from tkinter import *
+from PIL import ImageTk, Image
+
+
 
 ntpClient = ntplib.NTPClient()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
@@ -26,6 +30,9 @@ client = storage.Client()
 bucket = client.get_bucket('exam-guard.appspot.com')
 courseName = "BIL421"
 examName = "exam1"
+'''
+enter exam time as seconds !!
+'''
 examTime = 10
 studentId = "161101024"
 directoryNames = ["examPapersByExamGuard","examPapersByPhone","examVideo","idCheck"]
@@ -77,10 +84,11 @@ class View(tk.Frame):
         startTime = getCurrentTime()
         self.window.title("Guardians")
         self.window.geometry("510x420")
+        self.window.iconbitmap('images/logo2.ico')
         x_Left = int(self.window.winfo_screenwidth()/2 - 255)
         y_Top = int(self.window.winfo_screenheight()/2 - 210)
         self.window.geometry("+{}+{}".format(x_Left, y_Top))
-        self.window.configure(bg="#e8e8e8")
+        self.window.configure(bg="#e8e8e8")     
 
         buttonKimlik = ttk.Button(self.window, text="Kimlik Doğrulama")
         buttonKimlik.place(x=25, y=25, height=50)
@@ -114,7 +122,7 @@ class View(tk.Frame):
         kagitLabel2.place(x=25, y=175)
 
         global saatLabel
-        saatLabel = ttk.Label(self.window, text="Kalan Süre")
+        saatLabel = ttk.Label(self.window, text="Kalan Sınav Süresi: ")
         saatLabel.place(x=300, y=25)
 
 
@@ -143,7 +151,7 @@ class View(tk.Frame):
         while True:
             timeLeft = examTime-getCurrentTime()+startTime
             if timeLeft >= 0 :
-                saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds = timeLeft)))
+                saatLabel.configure(text="Kalan Sınav Süresi: "+str(datetime.timedelta(seconds = timeLeft)))
                 time.sleep(1)
             else:
                 studentCam.isTimeOver = True 
@@ -224,6 +232,7 @@ if __name__ == "__main__":
     root.title("Guardians")
     root.geometry("200x100")
     root.configure(bg="#e8e8e8")
+    root.iconbitmap('images/logo2.ico')
     x_Left = int(root.winfo_screenwidth()/2 - 100)
     y_Top = int(root.winfo_screenheight()/2 - 50)
     root.geometry("+{}+{}".format(x_Left, y_Top))
