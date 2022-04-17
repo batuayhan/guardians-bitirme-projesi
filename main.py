@@ -58,9 +58,8 @@ class View(tk.Frame):
 
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
-        b = tk.Button(self, text="Login with Google", command=self.new_window)
-        self.configure(bg="#e8e8e8")
-        b.place(x=40,y=25,height=40)
+        auth = Auth()
+        new_window()
         self.window = tk.Toplevel(self)
         self.window.withdraw()
         
