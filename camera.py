@@ -17,6 +17,8 @@ class Camera:
         self.height = height
         #self.fps = 30
         self.copyDetected=True
+        self.handDetected=False
+        self.isTimeOver = False
         self.alertSliceSize=25
         #self.vc.set(cv2.CAP_PROP_FPS, self.fps)
         (self.grabbed, self.frame) = self.vc.read()
@@ -60,6 +62,26 @@ class Camera:
                     self.frame[:,:self.alertSliceSize,2] = round(time.time()*1000)%255
                     self.frame[-self.alertSliceSize:,:,2] = round(time.time()*1000)%255
                     self.frame[:,-self.alertSliceSize:,2] = round(time.time()*1000)%255
+
+                if self.handDetected == True:
+                    self.frame[:self.alertSliceSize,::] =0
+                    self.frame[:,:self.alertSliceSize,:] = 0
+                    self.frame[-self.alertSliceSize:,:,:] = 0
+                    self.frame[:,-self.alertSliceSize:,:] = 0
+                    self.frame[:self.alertSliceSize,:,1] = round(time.time()*1000)%255
+                    self.frame[:,:self.alertSliceSize,1] = round(time.time()*1000)%255
+                    self.frame[-self.alertSliceSize:,:,1] = round(time.time()*1000)%255
+                    self.frame[:,-self.alertSliceSize:,1] = round(time.time()*1000)%255
+                
+                if self.isTimeOver == True:
+                    self.frame[:self.alertSliceSize,::] =0
+                    self.frame[:,:self.alertSliceSize,:] = 0
+                    self.frame[-self.alertSliceSize:,:,:] = 0
+                    self.frame[:,-self.alertSliceSize:,:] = 0
+                    self.frame[:self.alertSliceSize,:,0] = round(time.time()*1000)%255
+                    self.frame[:,:self.alertSliceSize,0] = round(time.time()*1000)%255
+                    self.frame[-self.alertSliceSize:,:,0] = round(time.time()*1000)%255
+                    self.frame[:,-self.alertSliceSize:,0] = round(time.time()*1000)%255
                 cam.send(self.frame)
 
                 #time.sleep(.01)
