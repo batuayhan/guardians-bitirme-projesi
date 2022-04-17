@@ -88,11 +88,30 @@ class View(tk.Frame):
         c = ttk.Checkbutton(self.window)
         c.place(x=175, y=40)
 
+        kimlikLabel = ttk.Label(self.window, text="Kameraya kimliğinizi gösterdiğiniz sırada butona basınız.")
+        kimlikLabel.place(x=25,y=75)
+
         buttonKagit = ttk.Button(self.window, text="Kağıt Kontrolü")
         buttonKagit.place(x=25, y=100, height=50, width=139)
 
         c2 = ttk.Checkbutton(self.window)
         c2.place(x=175, y=110)
+
+        kagitLabel = ttk.Label(self.window, text="Kameraya kağıdınızı gösterdiğiniz sırada")
+        kagitLabel.place(x=25,y=150)
+        kagitLabel2 = ttk.Label(self.window, text="butona basınız.")
+        kagitLabel2.place(x=25, y=175)
+
+        buttonKagit2 = ttk.Button(self.window, text="Sınav sonrası Kağıt Gösterimi")
+        buttonKagit2.place(x=25,y=200, height=50)
+
+        c3 = ttk.Checkbutton(self.window)
+        c3.place(x=250, y=215)
+
+        kagitLabel = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızı")
+        kagitLabel.place(x=25,y=150)
+        kagitLabel2 = ttk.Label(self.window, text="gösterdiğiniz sırada butona basınız.")
+        kagitLabel2.place(x=25, y=175)
 
         global saatLabel
         saatLabel = ttk.Label(self.window, text="Kalan Süre")
