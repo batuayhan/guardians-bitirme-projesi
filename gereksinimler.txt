@@ -1,0 +1,8 @@
+OBS virtual cam yükle.
+
+Kütüphaneler;
+cv2
+pyvirtualcam
+PIL
+google.cloud
+firebase_admin
