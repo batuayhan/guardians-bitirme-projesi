@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import TimeoutException
 
 class Auth:
-    AUTH_URL = 'https://exam-guard-desktop-auth.web.app/'
+    AUTH_URL = 'https://exam-guard-desktop-auth.firebaseapp.com/'
     AUTH_API_KEY = 'AIzaSyDk2zZgj6v3lYXP7t2nMRt_ed0Yx_GHUDs'
 
     def setEnvVars(jwt, refresh):
