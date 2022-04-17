@@ -40,7 +40,7 @@ enter exam time as seconds !!
 '''
 examTime = 10
 studentId = "161101024"
-directoryNames = ["examPapersByExamGuard","examPapersByPhone","examVideo","idCheck"]
+directoryNames = ["lastPaperCheck","examVideo","idCheck","firstPaperCheck"]
 blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[1]+'/ogrenciKayit'+studentId+'.mp4')
 #blob.content_type = "video/webm"
 #of = open("deneme.jpg", 'rb')
