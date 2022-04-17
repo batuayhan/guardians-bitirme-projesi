@@ -271,7 +271,7 @@ def detectRisks(frame):
             #print("[INFO] Face Detected")
             detectionData[1] = 0
         else:
-            saveFrame("RiskyMoments/Face/Frame" + str(riskyFaceCounter) + ".jpg", frame)
+            #saveFrame("RiskyMoments/Face/Frame" + str(riskyFaceCounter) + ".jpg", frame)
             riskyFaceCounter += 1
             print("[INFO] Face Not Detected")
             detectionData[1] = 1
@@ -314,7 +314,7 @@ def detectRisks(frame):
 
             if eye_position != 'CENTER':
                 print(eye_position)
-                saveFrame("RiskyMoments/Eyes/Frame" + str(riskyEyesCounter) + ".jpg", frame)
+                #saveFrame("RiskyMoments/Eyes/Frame" + str(riskyEyesCounter) + ".jpg", frame)
                 riskyEyesCounter += 1
                 detectionData[1] = 1
             else:

@@ -38,7 +38,7 @@ examName = "exam1"
 '''
 enter exam time as seconds !!
 '''
-examTime = 10
+examTime = 2700
 studentId = "161101024"
 directoryNames = ["lastPaperCheck","examVideo","idCheck","firstPaperCheck"]
 blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[1]+'/ogrenciKayit'+studentId+'.mp4')
@@ -81,7 +81,7 @@ class View(tk.Frame):
         self.window.withdraw()
         
     def login(self):
-        auth = Auth()
+        #auth = Auth()
         self.new_window()
 
     def new_window(self):
@@ -182,11 +182,10 @@ class View(tk.Frame):
                 studentCam.handDetected = False
                 riskyMomentFlag = False
             if detectionData[1] == 1:
-                studentCam.copyDetected = True,
+                studentCam.copyDetected = True
                 if riskyMomentFlag == False and getCurrentTime() not in riskyMomentsTimeStamps :
                     riskyMomentsTimeStamps.append(getCurrentTime())
                     riskyMomentFlag = True
-                
             else:
                 studentCam.copyDetected = False
         
