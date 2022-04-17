@@ -19,6 +19,7 @@ from time import ctime
 import examguardTelegramBot
 from tkinter import *
 from PIL import ImageTk, Image
+from auth import Auth
 import paperControl
 import cv2
 import idCheck
@@ -73,12 +74,17 @@ class View(tk.Frame):
 
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
+        b = tk.Button(self, text="Login with Google", command=self.login)
+        self.configure(bg="#e8e8e8")
+        b.place(x=40,y=25,height=40)
         auth = Auth()
         new_window()
         self.window = tk.Toplevel(self)
         self.window.withdraw()
         
-        
+    def login(self):
+        auth = Auth()
+        self.new_window()
 
     def new_window(self):
         root.withdraw()
