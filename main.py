@@ -10,6 +10,7 @@ from tkinter import messagebox
 import sys
 import firebase_admin
 from firebase_admin import credentials
+from firebase_admin import firestore
 from google.cloud import storage
 import os
 import RiskDetector
@@ -31,10 +32,11 @@ ntpClient = ntplib.NTPClient()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase = firebase_admin.initialize_app(cred)
+db = firestore.client()
 client = storage.Client()
 bucket = client.get_bucket('exam-guard.appspot.com')
 courseName = "BIL421"
-examName = "exam1"
+examName = "20212022SpringFirstExam"
 '''
 enter exam time as seconds !!
 '''
@@ -59,16 +61,27 @@ def getCurrentTime():
     except:
         return int(time.time())
 
+def getCurrentTimev2():
+    try:
+        request = ntpClient.request('europe.pool.ntp.org', version=3)
+        return request.orig_time
+    except:
+        return time.time()
 def groupRiskyMoments(lst):
     if lst != []:
         res = [[lst[0]]]
         for i in range(1, len(lst)):
-            if lst[i-1]+1 == lst[i]:
+            if lst[i] - lst[i-1]<1000:
                 res[-1].append(lst[i])
             else:
-                res.append([lst[i]])
+                res.append([lst[i], lst[i]+2000])
         return res
-
+def convertRiskyMoments(lst):
+    newList = []
+    for i in range(len(lst)):
+        newList.append(lst[i][0])
+        newList.append(lst[i][len(lst[i])-1])
+    return newList
 
 class View(tk.Frame):
 
@@ -170,7 +183,6 @@ class View(tk.Frame):
 
     def detectRisk(self, x, y):
         while True:
-            riskyMomentFlag = False
             imageframe = studentCam.image_frame(x,y)
             ret = studentCam.grabbed
             frame = studentCam.frame
@@ -180,12 +192,11 @@ class View(tk.Frame):
                 examguardTelegramBot.sendMessage(str(studentId) + " numaralı öğrenci elini kaldırdı.")
             else:
                 studentCam.handDetected = False
-                riskyMomentFlag = False
+                
             if detectionData[1] == 1:
                 studentCam.copyDetected = True
-                if riskyMomentFlag == False and getCurrentTime() not in riskyMomentsTimeStamps :
-                    riskyMomentsTimeStamps.append(getCurrentTime())
-                    riskyMomentFlag = True
+                currentTimeStamp = int((getCurrentTimev2()-studentCam.startTime)*1000)
+                riskyMomentsTimeStamps.append(currentTimeStamp)
             else:
                 studentCam.copyDetected = False
         
@@ -222,6 +233,8 @@ def on_closing():
         print("exam time: ",endTime-startTime)
         print("risky moments: ",(riskyMomentsTimeStamps))
         print("risky moments: ", groupRiskyMoments(riskyMomentsTimeStamps))
+        riskyMoments =  convertRiskyMoments(groupRiskyMoments(riskyMomentsTimeStamps))
+        db.collection("courses").document(courseName).collection("exams").document(examName).collection("examStudents").document("1111111111").set({"riskyMoments":riskyMoments})
         global studentCam
         global finished
         finished=True

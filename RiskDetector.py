@@ -327,7 +327,7 @@ def detectRisks(frame):
             else:
                 allDetectionData[1] = 0
     
-    print(allDetectionData)
+    ##print(allDetectionData)
     return allDetectionData
             
         

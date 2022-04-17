@@ -6,9 +6,9 @@ from pyvirtualcam import PixelFormat
 import time
 from PIL import Image, ImageTk
 from threading import Thread, Lock
-
+import ntplib
+ntpClient = ntplib.NTPClient()
 class Camera:
-
     def __init__(self,src=0,width=1280,height=720):
         self.vc=cv2.VideoCapture(src)
         self.vc.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -26,6 +26,7 @@ class Camera:
         self.started = False
         self.read_lock = Lock()
         self.finished = False
+        self.startTime = 0
         print("Tanimlamalar yapildi.")
 
     def start(self):
@@ -94,7 +95,15 @@ class Camera:
             cv2.destroyAllWindows()
             exit(1)
 
+    def getCurrentTime(self):
+        try:
+            request = ntpClient.request('europe.pool.ntp.org', version=3)
+            return request.orig_time
+        except:
+            return time.time()
+
     def record_video(self):
+        self.startTime = self.getCurrentTime()
         global out
         out = cv2.VideoWriter("ogrenciKayit.mp4",cv2.VideoWriter_fourcc(*'VIDX'),15,(320,240))
         while True:
