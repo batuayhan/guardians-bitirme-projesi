@@ -16,6 +16,7 @@ import RiskDetector
 import datetime
 import ntplib
 from time import ctime
+import examguardTelegramBot
 
 ntpClient = ntplib.NTPClient()
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="./serviceAccountKey.json"
@@ -25,7 +26,7 @@ client = storage.Client()
 bucket = client.get_bucket('exam-guard.appspot.com')
 courseName = "BIL421"
 examName = "exam1"
-examTime = 2700
+examTime = 10
 studentId = "161101024"
 directoryNames = ["examPapersByExamGuard","examPapersByPhone","examVideo","idCheck"]
 blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'/ogrenciKayit'+studentId+'.avi')
@@ -40,8 +41,11 @@ saatLabel = None
 
 
 def getCurrentTime():
-    request = ntpClient.request('europe.pool.ntp.org', version=3)
-    return int(request.orig_time)
+    try:
+        request = ntpClient.request('europe.pool.ntp.org', version=3)
+        return int(request.orig_time)
+    except:
+        return int(time.time())
 
 def groupRiskyMoments(lst):
     if lst != []:
@@ -123,8 +127,8 @@ class View(tk.Frame):
                 saatLabel.configure(text="Kalan Süre: "+str(datetime.timedelta(seconds = timeLeft)))
                 time.sleep(1)
             else:
-                break   
-        return        
+                studentCam.isTimeOver = True 
+      
 
     def detectRisk(self, x, y):
         while True:
@@ -135,6 +139,7 @@ class View(tk.Frame):
             detectionData = RiskDetector.detectRisks(frame)
             if detectionData[0] == 1:
                 studentCam.handDetected = True
+                examguardTelegramBot.sendMessage(str(studentId) + " numaralı öğrenci elini kaldırdı.")
             else:
                 studentCam.handDetected = False
                 riskyMomentFlag = False
