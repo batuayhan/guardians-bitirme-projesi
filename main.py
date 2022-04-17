@@ -20,6 +20,11 @@ import examguardTelegramBot
 from tkinter import *
 from PIL import ImageTk, Image
 from auth import Auth
+import paperControl
+import cv2
+import idCheck
+import simCheck
+from tkinter.filedialog import askopenfilename
 
 
 ntpClient = ntplib.NTPClient()
@@ -36,7 +41,7 @@ enter exam time as seconds !!
 examTime = 10
 studentId = "161101024"
 directoryNames = ["examPapersByExamGuard","examPapersByPhone","examVideo","idCheck"]
-blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[2]+'/ogrenciKayit'+studentId+'.mp4')
+blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[1]+'/ogrenciKayit'+studentId+'.mp4')
 #blob.content_type = "video/webm"
 #of = open("deneme.jpg", 'rb')
 #blob.upload_from_file(of)
@@ -94,37 +99,40 @@ class View(tk.Frame):
         self.window.geometry("+{}+{}".format(x_Left, y_Top))
         self.window.configure(bg="#e8e8e8")     
 
-        buttonKimlik = ttk.Button(self.window, text="Kimlik Doğrulama")
-        buttonKimlik.place(x=25, y=25, height=50)
-
+        buttonKimlik = ttk.Button(self.window, text="Kimlik Doğrulama", command=id_control)
+        buttonKimlik.place(x=25, y=25, height=50, width=155)
         c = ttk.Checkbutton(self.window)
-        c.place(x=175, y=40)
-
+        c.place(x=185, y=40)
         kimlikLabel = ttk.Label(self.window, text="Kameraya kimliğinizi gösterdiğiniz sırada butona basınız.")
         kimlikLabel.place(x=25,y=75)
 
-        buttonKagit = ttk.Button(self.window, text="Kağıt Kontrolü")
-        buttonKagit.place(x=25, y=100, height=50, width=139)
-
+        buttonKagit = ttk.Button(self.window, text="Sınav Önü Kağıt Kontrolü", command=paper_control)
+        buttonKagit.place(x=25, y=100, height=50, width=155)
         c2 = ttk.Checkbutton(self.window)
-        c2.place(x=175, y=110)
-
-        kagitLabel = ttk.Label(self.window, text="Kameraya kağıdınızı gösterdiğiniz sırada")
+        c2.place(x=185, y=110)
+        kagitLabel = ttk.Label(self.window, text="Kameraya boş kağıdınızı gösterdiğiniz sırada")
         kagitLabel.place(x=25,y=150)
         kagitLabel2 = ttk.Label(self.window, text="butona basınız.")
         kagitLabel2.place(x=25, y=175)
 
-        buttonKagit2 = ttk.Button(self.window, text="Sınav sonrası Kağıt Gösterimi")
-        buttonKagit2.place(x=25,y=200, height=50)
-
+        buttonKagit2 = ttk.Button(self.window, text="Sınav Sonu Kağıt Gösterme", command=last_paper_control)
+        buttonKagit2.place(x=25,y=200, height=50, width=155)
         c3 = ttk.Checkbutton(self.window)
-        c3.place(x=250, y=215)
+        c3.place(x=185, y=215)
+        kagitLabel3 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızı")
+        kagitLabel3.place(x=25,y=250)
+        kagitLabel4 = ttk.Label(self.window, text="gösterdiğiniz sırada butona basınız.")
+        kagitLabel4.place(x=25, y=275)
 
-        kagitLabel = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızı")
-        kagitLabel.place(x=25,y=150)
-        kagitLabel2 = ttk.Label(self.window, text="gösterdiğiniz sırada butona basınız.")
-        kagitLabel2.place(x=25, y=175)
-
+        buttonKagit3 = ttk.Button(self.window, text="Kağıt Fotoğrafı Yükleme", command=paper_submit)
+        buttonKagit3.place(x=25,y=300, height=50, width=155)
+        c4 = ttk.Checkbutton(self.window)
+        c4.place(x=185, y=315)
+        kagitLabel5 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızın")
+        kagitLabel5.place(x=25,y=350)
+        kagitLabel6 = ttk.Label(self.window, text="fotoğrafını yükleyiniz.")
+        kagitLabel6.place(x=25, y=375)
+        
         global saatLabel
         saatLabel = ttk.Label(self.window, text="Kalan Sınav Süresi: ")
         saatLabel.place(x=300, y=25)
@@ -227,7 +235,65 @@ def on_closing():
         studentCam.finish()
         print("program kapatildi")
         
+def paper_control():
+    image_name = "firstpaper.jpg"
+    frame = studentCam.original_frame
+    cv2.imwrite(image_name, frame)
+    result = paperControl.paperControl(image_name)
+    if result:
+        res = "Kağıt boş"
+        f = open(res, "w")
+    else:
+        res = "Kağıt boş değil"
+        f= open(res, "w")
+    f.close()
+    b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/firstpaper_' + studentId + '.jpg')
+    b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/firstpapercontrol_' + studentId + '.jpg')
+    b3 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/'+res + '_' + studentId)
+    b1.upload_from_filename(image_name)
+    b2.upload_from_filename("firstpapercontrol.jpg")
+    b3.upload_from_filename(res)
+    os.remove(image_name)
+    os.remove("firstpapercontrol.jpg")
+    os.remove(res)
 
+def id_control():
+    image_name = "id.jpg"
+    frame = studentCam.original_frame
+    cv2.imwrite(image_name, frame)
+    result = idCheck.idCheck(image_name, studentId)
+    if result:
+        res = "Kontrol başarılı"
+        f = open(res, "w")
+    else:
+        res = "Kontrol Başarısız"
+        f = open(res, 'w')
+    f.close()
+    b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/id_' + studentId + '.jpg')
+    b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/' + res + '_' + studentId)
+    b1.upload_from_filename(image_name)
+    b2.upload_from_filename(res)
+    os.remove(image_name)
+    os.remove(res)
+
+def last_paper_control():
+    image_name = "lastpaper.jpg"
+    frame = studentCam.original_frame
+    cv2.imwrite(image_name, frame)
+
+def paper_submit():
+    filename = askopenfilename()
+    result = simCheck.simCheck("lastpaper.jpg", filename)
+    f = open(result, "w")
+    f.close()
+    b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/lastpaper_' + studentId + '.jpg')
+    b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/dosya_' + studentId + '.jpg')
+    b3 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/'+result + '_' + studentId)
+    b1.upload_from_filename("lastpaper.jpg")
+    b2.upload_from_filename(filename)
+    b3.upload_from_filename(result)
+    os.remove("lastpaper.jpg")
+    os.remove(result)
         
 if __name__ == "__main__":
     start_camera()
