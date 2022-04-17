@@ -124,6 +124,7 @@ class View(tk.Frame):
         global saatLabel
         saatLabel = ttk.Label(self.window, text="Kalan Sınav Süresi: ")
         saatLabel.place(x=300, y=25)
+        saatLabel.config(font=("Helvetica", 12))
 
 
 
