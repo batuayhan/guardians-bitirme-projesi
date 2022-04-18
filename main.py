@@ -283,12 +283,12 @@ def paper_control():
         3] + '/firstpapercontrol_' + studentId + '.jpg')
 
     if firstPaperResult:
-        c2.select()
+        c2.state(["selected"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"emptyPaperCheck": "successful"})
     else:
-        c2.deselect()
+        c2.state(["deselected"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"emptyPaperCheck": "unsuccessful"})
@@ -309,12 +309,12 @@ def id_control():
         courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/id_' + studentId + '.jpg')
 
     if idResult:
-        c.select()
+        c.state(["selected"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"idNumberCheck": "successful"})
     else:
-        c.deselect()
+        c.state(["deselcted"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"idNumberCheck": "unsuccessful"})
