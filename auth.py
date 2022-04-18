@@ -61,6 +61,9 @@ class Auth:
     def refreshToken(self):
         self.jwt = Auth.refreshJWT(self.refresh)
 
+    def getUid(self):
+        return self.getToken()['user_id']
+
 if __name__ == "__main__":
     auth = Auth()
     print(auth.getToken()['exp'])
