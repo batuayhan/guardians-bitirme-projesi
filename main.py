@@ -79,10 +79,11 @@ def groupRiskyMoments(lst):
         return res
 def convertRiskyMoments(lst):
     newList = []
-    for i in range(len(lst)):
-        newList.append(lst[i][0])
-        newList.append(lst[i][len(lst[i])-1])
-    return newList
+    if lst != []:
+        for i in range(len(lst)):
+            newList.append(lst[i][0])
+            newList.append(lst[i][len(lst[i])-1])
+        return newList
 
 class View(tk.Frame):
 
