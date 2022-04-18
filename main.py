@@ -92,9 +92,8 @@ class View(tk.Frame):
         b.place(x=65,y=160,height=40,width=170)
 
         options = [
-            "BİL 421",
-            "BİL 395",
-            "BİL 403",
+            "BIL421",
+            "BIL331",
         ]
         global clicked
         clicked = StringVar()
