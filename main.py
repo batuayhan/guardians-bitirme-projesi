@@ -132,36 +132,41 @@ class View(tk.Frame):
         buttonKimlik.place(x=25, y=25, height=50, width=155)
         global c
         c = ttk.Checkbutton(self.window)
+        c.state(["!alternate"])
         c.place(x=185, y=40)
         kimlikLabel = ttk.Label(self.window, text="Kameraya kimliğinizi gösterdiğiniz sırada butona basınız.")
-        kimlikLabel.place(x=25,y=75)
+        kimlikLabel.place(x=25, y=75)
 
         buttonKagit = ttk.Button(self.window, text="Sınav Öncesi Kağıt Kontrolü", command=paper_control)
         buttonKagit.place(x=25, y=100, height=50, width=210)
         global c2
         c2 = ttk.Checkbutton(self.window)
+        c2.state(["!alternate"])
         c2.place(x=245, y=115)
         kagitLabel = ttk.Label(self.window, text="Kameraya boş kağıdınızı gösterdiğiniz sırada butona")
-        kagitLabel.place(x=25,y=150)
+        kagitLabel.place(x=25, y=150)
         kagitLabel2 = ttk.Label(self.window, text="basınız.")
         kagitLabel2.place(x=25, y=175)
 
         buttonKagit2 = ttk.Button(self.window, text="Sınav Sonu Kağıt Gösterme", command=last_paper_control)
-        buttonKagit2.place(x=25,y=200, height=50, width=210)
+        buttonKagit2.place(x=25, y=200, height=50, width=210)
         global c3
         c3 = ttk.Checkbutton(self.window)
+        c3.state(["!alternate"])
         c3.place(x=245, y=215)
         kagitLabel3 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızı gösterdiğiniz sırada")
-        kagitLabel3.place(x=25,y=250)
+        kagitLabel3.place(x=25, y=250)
         kagitLabel4 = ttk.Label(self.window, text="butona basınız.")
         kagitLabel4.place(x=25, y=275)
 
         buttonKagit3 = ttk.Button(self.window, text="Kağıt Fotoğrafı Yükleme", command=paper_submit)
-        buttonKagit3.place(x=25,y=300, height=50, width=210)
+        buttonKagit3.place(x=25, y=300, height=50, width=210)
+        global c4
         c4 = ttk.Checkbutton(self.window)
+        c4.state(["!alternate"])
         c4.place(x=245, y=315)
         kagitLabel5 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızın fotoğrafını")
-        kagitLabel5.place(x=25,y=350)
+        kagitLabel5.place(x=25, y=350)
         kagitLabel6 = ttk.Label(self.window, text="yükleyiniz.")
         kagitLabel6.place(x=25, y=375)
         
@@ -273,7 +278,7 @@ def on_closing():
         print("program kapatildi")
 
 
-def paper_control():
+def paper_control_aux():
     global firstPaperResult
     image_name = "firstpaper.jpg"
     frame = studentCam.original_frame
@@ -285,23 +290,27 @@ def paper_control():
         3] + '/firstpapercontrol_' + studentId + '.jpg')
 
     if firstPaperResult:
-        c2.state(["selected"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"emptyPaperCheck": "successful"})
+        c2.state(["selected"])
     else:
-        c2.state(["deselected"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"emptyPaperCheck": "unsuccessful"})
+        c2.state(["alternate"])
 
     b1.upload_from_filename(image_name)
     b2.upload_from_filename("firstpapercontrol.jpg")
     os.remove(image_name)
     os.remove("firstpapercontrol.jpg")
 
+def paper_control():
+    t = Thread(target=paper_control_aux, args=())
+    t.daemon = True
+    t.start()
 
-def id_control():
+def id_control_aux():
     global idResult
     image_name = "id.jpg"
     frame = studentCam.original_frame
@@ -311,27 +320,36 @@ def id_control():
         courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/id_' + studentId + '.jpg')
 
     if idResult:
-        c.state(["selected"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"idNumberCheck": "successful"})
+        c.state(["selected"])
     else:
-        c.state(["deselcted"])
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
             "examStudents").document(studentId).update(
             {"idNumberCheck": "unsuccessful"})
+        c.state(["alternate"])
 
     b1.upload_from_filename(image_name)
     os.remove(image_name)
 
+def id_control():
+    t = Thread(target=id_control_aux, args=())
+    t.daemon = True
+    t.start()
 
-def last_paper_control():
+def last_paper_control_aux():
     image_name = "lastpaper.jpg"
     frame = studentCam.original_frame
     cv2.imwrite(image_name, frame)
+    c3.state(["selected"])
 
+def last_paper_control():
+    t = Thread(target=last_paper_control_aux, args=())
+    t.daemon = True
+    t.start()
 
-def paper_submit():
+def paper_submit_aux():
     global lastPaperResult
     filename = askopenfilename()
     lastPaperResult = simCheck.simCheck("lastpaper.jpg", filename)
@@ -346,7 +364,16 @@ def paper_submit():
 
     b1.upload_from_filename("lastpaper.jpg")
     b2.upload_from_filename(filename)
+    if len(filename)>0:
+        c4.state(["selected"])
+    else:
+        c4.state(["alternate"])
     os.remove("lastpaper.jpg")
+
+def paper_submit():
+    t = Thread(target=paper_submit_aux, args=())
+    t.daemon = True
+    t.start()
         
 if __name__ == "__main__":
     start_camera()
