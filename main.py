@@ -223,6 +223,10 @@ class View(tk.Frame):
 
 global studentCam
 global finished
+global firstPaperResult
+global idResult
+global lastPaperResult
+
 def start_camera():
         global studentCam
         studentCam = camera.start_camera()
@@ -235,6 +239,29 @@ def on_closing():
         print("risky moments: ", groupRiskyMoments(riskyMomentsTimeStamps))
         riskyMoments =  convertRiskyMoments(groupRiskyMoments(riskyMomentsTimeStamps))
         db.collection("courses").document(courseName).collection("exams").document(examName).collection("examStudents").document("1111111111").set({"riskyMoments":riskyMoments})
+
+        if firstPaperResult:
+            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+                "examStudents").document(studentId).update(
+                {"emptyPaperCheck": "successful"})
+        else:
+            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+                "examStudents").document(studentId).update(
+                {"emptyPaperCheck": "unsuccessful"})
+
+        if idResult:
+            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+                "examStudents").document(studentId).update(
+                {"idNumberCheck": "successful"})
+        else:
+            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+                "examStudents").document(studentId).update(
+                {"idNumberCheck": "unsuccessful"})
+
+        db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+            "examStudents").document(studentId).update(
+            {"examPaperCheck": lastPaperResult})
+
         global studentCam
         global finished
         finished=True
@@ -244,47 +271,29 @@ def on_closing():
         print("video sisteme yüklendi")
         studentCam.finish()
         print("program kapatildi")
-        
+
 def paper_control():
+    global firstPaperResult
     image_name = "firstpaper.jpg"
     frame = studentCam.original_frame
     cv2.imwrite(image_name, frame)
-    result = paperControl.paperControl(image_name)
-    if result:
-        res = "Kağıt boş"
-        f = open(res, "w")
-    else:
-        res = "Kağıt boş değil"
-        f= open(res, "w")
-    f.close()
+    firstPaperResult = paperControl.paperControl(image_name)
     b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/firstpaper_' + studentId + '.jpg')
     b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/firstpapercontrol_' + studentId + '.jpg')
-    b3 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/'+res + '_' + studentId)
     b1.upload_from_filename(image_name)
     b2.upload_from_filename("firstpapercontrol.jpg")
-    b3.upload_from_filename(res)
     os.remove(image_name)
     os.remove("firstpapercontrol.jpg")
-    os.remove(res)
 
 def id_control():
+    global idResult
     image_name = "id.jpg"
     frame = studentCam.original_frame
     cv2.imwrite(image_name, frame)
-    result = idCheck.idCheck(image_name, studentId)
-    if result:
-        res = "Kontrol başarılı"
-        f = open(res, "w")
-    else:
-        res = "Kontrol Başarısız"
-        f = open(res, 'w')
-    f.close()
+    idResult = idCheck.idCheck(image_name, studentId)
     b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/id_' + studentId + '.jpg')
-    b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/' + res + '_' + studentId)
     b1.upload_from_filename(image_name)
-    b2.upload_from_filename(res)
     os.remove(image_name)
-    os.remove(res)
 
 def last_paper_control():
     image_name = "lastpaper.jpg"
@@ -292,18 +301,14 @@ def last_paper_control():
     cv2.imwrite(image_name, frame)
 
 def paper_submit():
+    global lastPaperResult
     filename = askopenfilename()
-    result = simCheck.simCheck("lastpaper.jpg", filename)
-    f = open(result, "w")
-    f.close()
+    lastPaperResult = simCheck.simCheck("lastpaper.jpg", filename)
     b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/lastpaper_' + studentId + '.jpg')
     b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/dosya_' + studentId + '.jpg')
-    b3 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/'+result + '_' + studentId)
     b1.upload_from_filename("lastpaper.jpg")
     b2.upload_from_filename(filename)
-    b3.upload_from_filename(result)
     os.remove("lastpaper.jpg")
-    os.remove(result)
         
 if __name__ == "__main__":
     start_camera()
