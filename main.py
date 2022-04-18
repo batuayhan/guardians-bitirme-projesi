@@ -35,7 +35,7 @@ firebase = firebase_admin.initialize_app(cred)
 db = firestore.client()
 client = storage.Client()
 bucket = client.get_bucket('exam-guard.appspot.com')
-courseName = "BIL421"
+courseName = ""
 examName = "20212022SpringFirstExam"
 '''
 enter exam time as seconds !!
@@ -98,12 +98,15 @@ class View(tk.Frame):
         ]
         clicked = StringVar()
         clicked.set("Sınavınızı seçiniz")
-        
+        print(clicked.get())
         drop = OptionMenu( root , clicked , *options )
         drop.place(x=65, y=60,height=40,width=170)
 
         self.window = tk.Toplevel(self)
         self.window.withdraw()
+        global courseName
+        courseName = clicked.get()
+        print(courseName)
   
 
     def login(self):
