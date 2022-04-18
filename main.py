@@ -21,6 +21,7 @@ import examguardTelegramBot
 from tkinter import *
 from PIL import ImageTk, Image
 from auth import Auth
+from db import DB
 import paperControl
 import cv2
 import idCheck
@@ -106,7 +107,8 @@ class View(tk.Frame):
         self.window.withdraw()
 
     def login(self):
-        #auth = Auth()
+        auth = Auth()
+        db = DB(auth)
         self.new_window()
 
     def new_window(self):
