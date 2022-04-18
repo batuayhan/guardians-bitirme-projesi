@@ -45,13 +45,13 @@ def simCheck(img1, img2):
     result = ""
     if number_keypoints == 0:
         print("Match: 0/100")
-        result = "Kötü benzerlik"
+        result = "Bad similarity"
     else:
         print("Match: ", len(good_points) / number_keypoints * 100, "/100")
-        if len(good_points) / number_keypoints * 100 > 20:
-            result = "İyi benzerlik"
+        if len(good_points) / number_keypoints * 100 > 10:
+            result = "Good similarity"
         else:
-            result = "Kötü benzerlik"
+            result = "Bad similarity"
     print(result)
 
     return result
