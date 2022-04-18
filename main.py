@@ -89,10 +89,23 @@ class View(tk.Frame):
         tk.Frame.__init__(self, *args, **kwargs)
         b = tk.Button(self, text="Login with Google", command=self.login)
         self.configure(bg="#e8e8e8")
-        b.place(x=40,y=25,height=40)
+        b.place(x=65,y=160,height=40,width=170)
+
+        options = [
+            "BİL 421",
+            "BİL 395",
+            "BİL 403",
+        ]
+        clicked = StringVar()
+        clicked.set("Sınavınızı seçiniz")
+        
+        drop = OptionMenu( root , clicked , *options )
+        drop.place(x=65, y=60,height=40,width=170)
+
         self.window = tk.Toplevel(self)
         self.window.withdraw()
-        
+  
+
     def login(self):
         #auth = Auth()
         self.new_window()
@@ -103,10 +116,10 @@ class View(tk.Frame):
         global startTime
         startTime = getCurrentTime()
         self.window.title("Guardians")
-        self.window.geometry("510x420")
+        self.window.geometry("720x480")
         self.window.iconbitmap('images/logo2.ico')
-        x_Left = int(self.window.winfo_screenwidth()/2 - 255)
-        y_Top = int(self.window.winfo_screenheight()/2 - 210)
+        x_Left = int(self.window.winfo_screenwidth()/2 - 360)
+        y_Top = int(self.window.winfo_screenheight()/2 - 240)
         self.window.geometry("+{}+{}".format(x_Left, y_Top))
         self.window.configure(bg="#e8e8e8")     
 
@@ -117,36 +130,36 @@ class View(tk.Frame):
         kimlikLabel = ttk.Label(self.window, text="Kameraya kimliğinizi gösterdiğiniz sırada butona basınız.")
         kimlikLabel.place(x=25,y=75)
 
-        buttonKagit = ttk.Button(self.window, text="Sınav Önü Kağıt Kontrolü", command=paper_control)
-        buttonKagit.place(x=25, y=100, height=50, width=155)
+        buttonKagit = ttk.Button(self.window, text="Sınav Öncesi Kağıt Kontrolü", command=paper_control)
+        buttonKagit.place(x=25, y=100, height=50, width=210)
         c2 = ttk.Checkbutton(self.window)
-        c2.place(x=185, y=110)
-        kagitLabel = ttk.Label(self.window, text="Kameraya boş kağıdınızı gösterdiğiniz sırada")
+        c2.place(x=245, y=115)
+        kagitLabel = ttk.Label(self.window, text="Kameraya boş kağıdınızı gösterdiğiniz sırada butona")
         kagitLabel.place(x=25,y=150)
-        kagitLabel2 = ttk.Label(self.window, text="butona basınız.")
+        kagitLabel2 = ttk.Label(self.window, text="basınız.")
         kagitLabel2.place(x=25, y=175)
 
         buttonKagit2 = ttk.Button(self.window, text="Sınav Sonu Kağıt Gösterme", command=last_paper_control)
-        buttonKagit2.place(x=25,y=200, height=50, width=155)
+        buttonKagit2.place(x=25,y=200, height=50, width=210)
         c3 = ttk.Checkbutton(self.window)
-        c3.place(x=185, y=215)
-        kagitLabel3 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızı")
+        c3.place(x=245, y=215)
+        kagitLabel3 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızı gösterdiğiniz sırada")
         kagitLabel3.place(x=25,y=250)
-        kagitLabel4 = ttk.Label(self.window, text="gösterdiğiniz sırada butona basınız.")
+        kagitLabel4 = ttk.Label(self.window, text="butona basınız.")
         kagitLabel4.place(x=25, y=275)
 
         buttonKagit3 = ttk.Button(self.window, text="Kağıt Fotoğrafı Yükleme", command=paper_submit)
-        buttonKagit3.place(x=25,y=300, height=50, width=155)
+        buttonKagit3.place(x=25,y=300, height=50, width=210)
         c4 = ttk.Checkbutton(self.window)
-        c4.place(x=185, y=315)
-        kagitLabel5 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızın")
+        c4.place(x=245, y=315)
+        kagitLabel5 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızın fotoğrafını")
         kagitLabel5.place(x=25,y=350)
-        kagitLabel6 = ttk.Label(self.window, text="fotoğrafını yükleyiniz.")
+        kagitLabel6 = ttk.Label(self.window, text="yükleyiniz.")
         kagitLabel6.place(x=25, y=375)
         
         global saatLabel
         saatLabel = ttk.Label(self.window, text="Kalan Sınav Süresi: ")
-        saatLabel.place(x=300, y=25)
+        saatLabel.place(x=500, y=25)
         saatLabel.config(font=("Helvetica", 12))
 
 
@@ -154,9 +167,9 @@ class View(tk.Frame):
         t2 = Thread(target=self.show_cam, args=(200,150))
         t2.daemon = True
         t2.start()
-        t3 = Thread(target=studentCam.record_video, args=())
-        t3.daemon=True
-        t3.start()
+        ##t3 = Thread(target=studentCam.record_video, args=())
+        ##t3.daemon=True
+        ##t3.start()
 
         t4 = Thread(target=self.detectRisk, args=(200,150))
         t4.daemon = True
@@ -169,7 +182,7 @@ class View(tk.Frame):
     
 
         submitButton = ttk.Button(self.window, text="Finish",command = on_closing)
-        submitButton.place(x=400, y=370, height=30)
+        submitButton.place(x=600, y=370, height=30)
     
     def updateTime(self):
         while True:
@@ -207,7 +220,7 @@ class View(tk.Frame):
         imageframe = ImageTk.PhotoImage(image=imageframe)
         kameraLabel = ttk.Label(self.window, image=imageframe)
         kameraLabel.image = imageframe
-        kameraLabel.place(x=300,y=150)
+        kameraLabel.place(x=500,y=150)
         while True:
             if finished:
                 break
@@ -219,7 +232,7 @@ class View(tk.Frame):
                 break
             kameraLabel.configure(image=imageframe)
             kameraLabel.image = imageframe
-            kameraLabel.place(x=300,y=150)
+            kameraLabel.place(x=500,y=150)
 
 global studentCam
 global finished
@@ -316,11 +329,11 @@ if __name__ == "__main__":
     root = tk.Tk()
     view = View(root)
     root.title("Guardians")
-    root.geometry("200x100")
+    root.geometry("300x350")
     root.configure(bg="#e8e8e8")
     root.iconbitmap('images/logo2.ico')
-    x_Left = int(root.winfo_screenwidth()/2 - 100)
-    y_Top = int(root.winfo_screenheight()/2 - 50)
+    x_Left = int(root.winfo_screenwidth()/2 - 150)
+    y_Top = int(root.winfo_screenheight()/2 - 200)
     root.geometry("+{}+{}".format(x_Left, y_Top))
     view.pack(side="top", fill="both", expand=True)
     root.mainloop()
