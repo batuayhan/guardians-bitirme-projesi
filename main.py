@@ -129,6 +129,7 @@ class View(tk.Frame):
 
         buttonKimlik = ttk.Button(self.window, text="Kimlik Doğrulama", command=id_control)
         buttonKimlik.place(x=25, y=25, height=50, width=155)
+        global c
         c = ttk.Checkbutton(self.window)
         c.place(x=185, y=40)
         kimlikLabel = ttk.Label(self.window, text="Kameraya kimliğinizi gösterdiğiniz sırada butona basınız.")
@@ -136,6 +137,7 @@ class View(tk.Frame):
 
         buttonKagit = ttk.Button(self.window, text="Sınav Öncesi Kağıt Kontrolü", command=paper_control)
         buttonKagit.place(x=25, y=100, height=50, width=210)
+        global c2
         c2 = ttk.Checkbutton(self.window)
         c2.place(x=245, y=115)
         kagitLabel = ttk.Label(self.window, text="Kameraya boş kağıdınızı gösterdiğiniz sırada butona")
@@ -145,6 +147,7 @@ class View(tk.Frame):
 
         buttonKagit2 = ttk.Button(self.window, text="Sınav Sonu Kağıt Gösterme", command=last_paper_control)
         buttonKagit2.place(x=25,y=200, height=50, width=210)
+        global c3
         c3 = ttk.Checkbutton(self.window)
         c3.place(x=245, y=215)
         kagitLabel3 = ttk.Label(self.window, text="Sınavınızı bitirdikten sonra kağıdınızı gösterdiğiniz sırada")
@@ -258,19 +261,23 @@ def on_closing():
         db.collection("courses").document(courseName).collection("exams").document(examName).collection("examStudents").document("1111111111").set({"riskyMoments":riskyMoments})
 
         if firstPaperResult:
+            c.select()
             db.collection("courses").document(courseName).collection("exams").document(examName).collection(
                 "examStudents").document(studentId).update(
                 {"emptyPaperCheck": "successful"})
         else:
+            c.deselect()
             db.collection("courses").document(courseName).collection("exams").document(examName).collection(
                 "examStudents").document(studentId).update(
                 {"emptyPaperCheck": "unsuccessful"})
 
         if idResult:
+            c2.select()
             db.collection("courses").document(courseName).collection("exams").document(examName).collection(
                 "examStudents").document(studentId).update(
                 {"idNumberCheck": "successful"})
         else:
+            c2.deselect()
             db.collection("courses").document(courseName).collection("exams").document(examName).collection(
                 "examStudents").document(studentId).update(
                 {"idNumberCheck": "unsuccessful"})
