@@ -96,6 +96,7 @@ class View(tk.Frame):
             "BİL 395",
             "BİL 403",
         ]
+        global clicked
         clicked = StringVar()
         clicked.set("Sınavınızı seçiniz")
         print(clicked.get())
@@ -104,16 +105,16 @@ class View(tk.Frame):
 
         self.window = tk.Toplevel(self)
         self.window.withdraw()
-        global courseName
-        courseName = clicked.get()
-        print(courseName)
-  
 
     def login(self):
         #auth = Auth()
         self.new_window()
 
     def new_window(self):
+        global courseName
+        courseName = clicked.get()
+        print(courseName)
+
         root.withdraw()
         self.window.deiconify()
         global startTime
