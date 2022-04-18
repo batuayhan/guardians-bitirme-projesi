@@ -7,15 +7,15 @@ def read(path):
 def idCheck(image_name, id):
     isValid = False
     res = read(image_name)
-    for r in res:
-        print(r)
+    #for r in res:
+        #print(r)
     for i in range(0,len(res)):
         if(id in res[i]):
             isValid = True
             break
-    if isValid == False:
+    '''if isValid == False:
         print("Invalid ID")
     else:
-        print("Welcome, ", id)
+        print("Welcome, ", id)'''
 
     return isValid
