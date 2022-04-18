@@ -44,7 +44,7 @@ enter exam time as seconds !!
 examTime = 2700
 studentId = "161101024"
 directoryNames = ["lastPaperCheck","examVideo","idCheck","firstPaperCheck"]
-blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[1]+'/ogrenciKayit'+studentId+'.mp4')
+blob=""
 #blob.content_type = "video/webm"
 #of = open("deneme.jpg", 'rb')
 #blob.upload_from_file(of)
@@ -107,15 +107,18 @@ class View(tk.Frame):
         self.window.withdraw()
 
     def login(self):
-        auth = Auth()
-        db = DB(auth)
+        ##auth = Auth()
+      ##  db = DB(auth)
         self.new_window()
 
     def new_window(self):
         global courseName
         courseName = clicked.get()
+        global blob
+        blob = bucket.blob(courseName+'/'+examName+'/'+studentId+'/'+directoryNames[1]+'/ogrenciKayit'+studentId+'.mp4')
         print(courseName)
-
+        db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+            "examStudents").document("161101024").set({})
         root.withdraw()
         self.window.deiconify()
         global startTime
@@ -180,9 +183,9 @@ class View(tk.Frame):
         t2 = Thread(target=self.show_cam, args=(200,150))
         t2.daemon = True
         t2.start()
-        ##t3 = Thread(target=studentCam.record_video, args=())
-        ##t3.daemon=True
-        ##t3.start()
+        t3 = Thread(target=studentCam.record_video, args=())
+        t3.daemon=True
+        t3.start()
 
         t4 = Thread(target=self.detectRisk, args=(200,150))
         t4.daemon = True
@@ -265,7 +268,7 @@ def on_closing():
         print("risky moments: ", groupRiskyMoments(riskyMomentsTimeStamps))
         riskyMoments = convertRiskyMoments(groupRiskyMoments(riskyMomentsTimeStamps))
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
-            "examStudents").document("1111111111").update({"riskyMoments": riskyMoments})
+            "examStudents").document("161101024").update({"riskyMoments": riskyMoments})
 
         global studentCam
         global finished
