@@ -253,47 +253,23 @@ def start_camera():
 def on_closing():
     if messagebox.askokcancel("Finish", "Make you sure whether sent your exam papers. Are you sure?"):
         endTime = getCurrentTime()
-        print("exam time: ",endTime-startTime)
-        print("risky moments: ",(riskyMomentsTimeStamps))
+        print("exam time: ", endTime - startTime)
+        print("risky moments: ", (riskyMomentsTimeStamps))
         print("risky moments: ", groupRiskyMoments(riskyMomentsTimeStamps))
-        riskyMoments =  convertRiskyMoments(groupRiskyMoments(riskyMomentsTimeStamps))
-        db.collection("courses").document(courseName).collection("exams").document(examName).collection("examStudents").document("1111111111").set({"riskyMoments":riskyMoments})
-
-        if firstPaperResult:
-            c.select()
-            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
-                "examStudents").document(studentId).update(
-                {"emptyPaperCheck": "successful"})
-        else:
-            c.deselect()
-            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
-                "examStudents").document(studentId).update(
-                {"emptyPaperCheck": "unsuccessful"})
-
-        if idResult:
-            c2.select()
-            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
-                "examStudents").document(studentId).update(
-                {"idNumberCheck": "successful"})
-        else:
-            c2.deselect()
-            db.collection("courses").document(courseName).collection("exams").document(examName).collection(
-                "examStudents").document(studentId).update(
-                {"idNumberCheck": "unsuccessful"})
-
+        riskyMoments = convertRiskyMoments(groupRiskyMoments(riskyMomentsTimeStamps))
         db.collection("courses").document(courseName).collection("exams").document(examName).collection(
-            "examStudents").document(studentId).update(
-            {"examPaperCheck": lastPaperResult})
+            "examStudents").document("1111111111").update({"riskyMoments": riskyMoments})
 
         global studentCam
         global finished
-        finished=True
-        studentCam.stop_camera() #stop recording
+        finished = True
+        studentCam.stop_camera()  # stop recording
         print("video sisteme yükleniyor")
         blob.upload_from_filename("ogrenciKayit.mp4")
         print("video sisteme yüklendi")
         studentCam.finish()
         print("program kapatildi")
+
 
 def paper_control():
     global firstPaperResult
@@ -301,12 +277,27 @@ def paper_control():
     frame = studentCam.original_frame
     cv2.imwrite(image_name, frame)
     firstPaperResult = paperControl.paperControl(image_name)
-    b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/firstpaper_' + studentId + '.jpg')
-    b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/firstpapercontrol_' + studentId + '.jpg')
+    b1 = bucket.blob(
+        courseName + '/' + examName + '/' + studentId + '/' + directoryNames[3] + '/firstpaper_' + studentId + '.jpg')
+    b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[
+        3] + '/firstpapercontrol_' + studentId + '.jpg')
+
+    if firstPaperResult:
+        c2.select()
+        db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+            "examStudents").document(studentId).update(
+            {"emptyPaperCheck": "successful"})
+    else:
+        c2.deselect()
+        db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+            "examStudents").document(studentId).update(
+            {"emptyPaperCheck": "unsuccessful"})
+
     b1.upload_from_filename(image_name)
     b2.upload_from_filename("firstpapercontrol.jpg")
     os.remove(image_name)
     os.remove("firstpapercontrol.jpg")
+
 
 def id_control():
     global idResult
@@ -314,21 +305,43 @@ def id_control():
     frame = studentCam.original_frame
     cv2.imwrite(image_name, frame)
     idResult = idCheck.idCheck(image_name, studentId)
-    b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/id_' + studentId + '.jpg')
+    b1 = bucket.blob(
+        courseName + '/' + examName + '/' + studentId + '/' + directoryNames[2] + '/id_' + studentId + '.jpg')
+
+    if idResult:
+        c.select()
+        db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+            "examStudents").document(studentId).update(
+            {"idNumberCheck": "successful"})
+    else:
+        c.deselect()
+        db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+            "examStudents").document(studentId).update(
+            {"idNumberCheck": "unsuccessful"})
+
     b1.upload_from_filename(image_name)
     os.remove(image_name)
+
 
 def last_paper_control():
     image_name = "lastpaper.jpg"
     frame = studentCam.original_frame
     cv2.imwrite(image_name, frame)
 
+
 def paper_submit():
     global lastPaperResult
     filename = askopenfilename()
     lastPaperResult = simCheck.simCheck("lastpaper.jpg", filename)
-    b1 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/lastpaper_' + studentId + '.jpg')
-    b2 = bucket.blob(courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/dosya_' + studentId + '.jpg')
+    b1 = bucket.blob(
+        courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/lastpaper_' + studentId + '.jpg')
+    b2 = bucket.blob(
+        courseName + '/' + examName + '/' + studentId + '/' + directoryNames[0] + '/dosya_' + studentId + '.jpg')
+
+    db.collection("courses").document(courseName).collection("exams").document(examName).collection(
+        "examStudents").document(studentId).update(
+        {"examPaperCheck": lastPaperResult})
+
     b1.upload_from_filename("lastpaper.jpg")
     b2.upload_from_filename(filename)
     os.remove("lastpaper.jpg")
